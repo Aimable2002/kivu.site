@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kivu Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fade-in  { animation: fadeIn .3s ease-in-out; }
+        .slide-up { animation: slideUp .4s ease-out forwards; }
+        @keyframes fadeIn  { from { opacity:0 } to { opacity:1 } }
+        @keyframes slideUp { from { transform:translateY(100%) } to { transform:translateY(0) } }
+        .no-scrollbar::-webkit-scrollbar { display:none }
+        .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none }
+    </style>
+</head>
+<body class="bg-gray-200 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full relative bg-gray-50 flex flex-col shadow-2xl overflow-hidden">
+
+    <div class="bg-gradient-to-r from-slate-800 to-gray-900 text-white pt-10 pb-4 px-4 shadow-lg shrink-0 z-20">
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center gap-3">
+                <button class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                    <i class="fas fa-arrow-left text-sm"></i>
+                </button>
+                <div>
+                    <h2 class="font-bold text-xl tracking-tight">Kivu Academy</h2>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Knowledge is Power</p>
+                </div>
+            </div>
+            <button class="bg-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/20">
+                <i class="fas fa-bookmark"></i> Saved
+            </button>
+        </div>
+        <div class="relative">
+            <input id="search-input" type="text" placeholder="Search physics, mining, code..."
+                   class="w-full bg-slate-700/50 border border-slate-600 text-white placeholder-gray-400 rounded-xl px-10 py-3 text-sm focus:border-slate-400 outline-none transition">
+            <i class="fas fa-search absolute left-4 top-3.5 text-gray-400 text-sm"></i>
+        </div>
+    </div>
+
+    <a href="#" class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-3 shrink-0 flex items-center justify-between shadow-sm active:opacity-90">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <i class="fas fa-robot text-base"></i>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold">Hard to read in English?</h4>
+                <p class="text-[10px] text-blue-100">Tap here to ask Kivu AI to explain it.</p>
+            </div>
+        </div>
+        <i class="fas fa-chevron-right text-blue-200 text-sm"></i>
+    </a>
+
+    <div class="bg-white px-3 py-2.5 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b border-gray-200 shadow-sm">
+        <button data-cat="All" onclick="window._filterCat(this)" class="cat-btn shrink-0 bg-slate-800 text-white px-4 py-1.5 rounded-full text-xs font-bold">All</button>
+        <button data-cat="Languages" onclick="window._filterCat(this)" class="cat-btn shrink-0 bg-gray-100 border border-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold">🌍 Languages</button>
+        <button data-cat="Mining & Geology" onclick="window._filterCat(this)" class="cat-btn shrink-0 bg-gray-100 border border-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold">⛏️ Mining & Geology</button>
+        <button data-cat="IT & Code" onclick="window._filterCat(this)" class="cat-btn shrink-0 bg-gray-100 border border-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold">💻 IT & Code</button>
+        <button data-cat="Practical Skills" onclick="window._filterCat(this)" class="cat-btn shrink-0 bg-gray-100 border border-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold">🛠️ Practical Skills</button>
+        <button data-cat="Local Laws" onclick="window._filterCat(this)" class="cat-btn shrink-0 bg-gray-100 border border-gray-200 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold">📜 Local Laws</button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-5 pb-6 no-scrollbar">
+
+        <div>
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 px-1">Interactive Tools</h3>
+            <div onclick="window._openDict()" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition relative overflow-hidden group">
+                <div class="absolute right-0 top-0 w-16 h-full bg-slate-50 transform skew-x-12 translate-x-4 group-hover:translate-x-0 transition-transform"></div>
+                <div class="w-14 h-14 bg-gradient-to-br from-slate-700 to-gray-900 rounded-xl flex items-center justify-center text-white text-2xl shadow-inner shrink-0 relative z-10">
+                    <i class="fas fa-language"></i>
+                </div>
+                <div class="flex-1 relative z-10">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h4 class="font-bold text-gray-900 text-sm">Smart Dictionary</h4>
+                        <span class="bg-green-100 text-green-700 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">Fast</span>
+                    </div>
+                    <p class="text-xs text-gray-500 leading-tight">Kinyarwanda ⇄ English / Chinese. Instant search.</p>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 px-1">Library (Downloadable)</h3>
+            <div id="books-list" class="space-y-3">
+                <div class="bg-white rounded-xl border border-gray-200 p-3 animate-pulse flex gap-3">
+                    <div class="w-16 h-20 bg-gray-200 rounded shrink-0"></div>
+                    <div class="flex-1 space-y-2 py-1">
+                        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dict-modal" class="hidden absolute inset-0 z-[100] bg-gray-100 flex flex-col slide-up">
+    <div class="bg-slate-800 text-white p-4 shadow-md flex justify-between items-center shrink-0">
+        <div>
+            <h2 class="font-bold text-lg">Smart Dictionary</h2>
+            <p class="text-[10px] text-green-400 font-bold uppercase">Kinyarwanda · English · Chinese</p>
+        </div>
+        <button onclick="window._closeDict()" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="bg-white p-3 shadow-sm border-b border-gray-200 shrink-0 flex items-center justify-between gap-2">
+        <select id="dict-from" onchange="window._setFromLang(this.value)"
+                class="bg-gray-100 rounded-lg p-2 text-sm font-bold text-slate-800 outline-none flex-1">
+            <option>Kinyarwanda</option>
+            <option>English</option>
+            <option>Chinese</option>
+        </select>
+        <button onclick="window._swapLangs()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-gray-200 transition shrink-0">
+            <i class="fas fa-exchange-alt text-sm"></i>
+        </button>
+        <select id="dict-to" onchange="window._setToLang(this.value)"
+                class="bg-gray-100 rounded-lg p-2 text-sm font-bold text-slate-800 outline-none flex-1">
+            <option>English</option>
+            <option>Kinyarwanda</option>
+            <option>Chinese</option>
+        </select>
+    </div>
+
+    <div class="flex-1 p-4 flex flex-col gap-4 overflow-y-auto no-scrollbar">
+        <div class="relative">
+            <input id="dict-input" type="text" placeholder="Type a word..."
+                   class="w-full bg-white border-2 border-slate-200 text-slate-900 placeholder-gray-400 rounded-xl px-12 py-4 text-base font-bold focus:border-slate-500 outline-none transition shadow-sm">
+            <i class="fas fa-search absolute left-4 top-5 text-slate-400 text-lg"></i>
+        </div>
+        <div id="dict-result" class="hidden bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"></div>
+    </div>
+</div>
+
+<div id="book-modal" class="hidden absolute inset-0 z-[100] bg-black/60 flex flex-col justify-end backdrop-blur-sm fade-in">
+    <div class="bg-white w-full rounded-t-3xl slide-up flex flex-col overflow-hidden shadow-2xl p-6">
+        <button onclick="window._closeBook()" class="absolute top-4 right-4 bg-gray-100 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-200 z-10">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <div class="flex gap-4 mb-5">
+            <div class="w-24 h-32 bg-slate-100 border border-slate-200 rounded-lg shrink-0 flex items-center justify-center shadow-inner">
+                <i id="modal-book-icon" class="fas fa-book-open text-4xl text-slate-300"></i>
+            </div>
+            <div class="flex-1 pt-2">
+                <h2 id="modal-book-title" class="text-lg font-bold text-gray-900 leading-tight mb-2"></h2>
+                <p id="modal-book-cat" class="text-xs text-gray-500 mb-2"></p>
+                <div class="flex items-center gap-2">
+                    <span id="modal-book-badge" class="px-2 py-1 rounded text-[10px] font-bold tracking-wide border"></span>
+                    <span id="modal-book-size" class="text-slate-600 text-xs font-bold"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-5">
+            <h3 class="font-bold text-sm text-slate-800 border-b border-gray-100 pb-1 mb-2">About this material</h3>
+            <p id="modal-book-desc" class="text-sm text-gray-600 leading-relaxed"></p>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-start gap-3 mb-5">
+            <i class="fas fa-info-circle text-amber-500 mt-0.5 shrink-0"></i>
+            <p class="text-[10px] text-amber-800 leading-snug">
+                This file will be saved directly to your phone's <b>Downloads</b> folder. You can read it offline anytime using your phone's own apps.
+            </p>
+        </div>
+
+        <div class="flex gap-3">
+            <button class="w-14 h-14 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl flex items-center justify-center text-xl active:scale-95 transition">
+                <i class="fas fa-robot"></i>
+            </button>
+            <button id="modal-download-btn"
+                    class="flex-1 bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 active:scale-95 transition hover:bg-slate-900 text-sm">
+                <i class="fas fa-cloud-download-alt"></i> Download File
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { loadBooks, filterByCategory, searchBooks, openBookModal, closeBookModal } from '/js/academy/books.js';
+    import { initDictionary, swapLanguages, setFromLang, setToLang }                   from '/js/academy/dictionary.js';
+
+    loadBooks();
+    initDictionary();
+
+    window._filterCat  = (btn) => filterByCategory(btn.dataset.cat);
+    window._openDict   = ()    => document.getElementById('dict-modal').classList.remove('hidden');
+    window._closeDict  = ()    => document.getElementById('dict-modal').classList.add('hidden');
+    window._swapLangs  = ()    => swapLanguages();
+    window._setFromLang= (v)   => setFromLang(v);
+    window._setToLang  = (v)   => setToLang(v);
+    window._openBook   = (b)   => openBookModal(b);
+    window._closeBook  = ()    => closeBookModal();
+
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        clearTimeout(window._sDebounce);
+        window._sDebounce = setTimeout(() => searchBooks(e.target.value), 300);
+    });
+</script>
+</body>
+</html>

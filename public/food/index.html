@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kivu Food</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fade-in  { animation: fadeIn .3s ease-in-out; }
+        .slide-up { animation: slideUp .4s ease-out forwards; }
+        @keyframes fadeIn  { from { opacity:0 } to { opacity:1 } }
+        @keyframes slideUp { from { transform:translateY(100%) } to { transform:translateY(0) } }
+        .no-scrollbar::-webkit-scrollbar { display:none }
+        .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none }
+        .bg-coral   { background-color:#FF7F50 }
+        .text-coral { color:#FF7F50 }
+        .border-coral { border-color:#FF7F50 }
+        .focus\:border-coral:focus { border-color:#FF7F50 }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full relative shadow-2xl overflow-hidden bg-white flex flex-col">
+
+    <div class="bg-coral text-white pt-10 pb-4 px-4 shadow-sm shrink-0 z-20">
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center gap-3">
+                <button class="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
+                    <i class="fas fa-arrow-left text-sm"></i>
+                </button>
+                <div>
+                    <h2 class="font-bold text-lg leading-none">Kivu Food</h2>
+                    <p class="text-[10px] text-white/80 font-medium">Find the best places</p>
+                </div>
+            </div>
+            <button onclick="window._openMap()" class="bg-white text-coral text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm active:scale-95 transition">
+                <i class="fas fa-map-marked-alt"></i> Map
+            </button>
+        </div>
+        <div class="relative">
+            <input id="search-input" type="text" placeholder="Search restaurants, dishes..."
+                   class="w-full bg-white/20 border border-white/40 text-white placeholder-white/70 rounded-xl px-10 py-3 text-sm outline-none focus:bg-white/30 transition">
+            <i class="fas fa-search absolute left-4 top-3.5 text-white/70 text-sm"></i>
+        </div>
+    </div>
+
+    <div class="bg-white px-3 py-2.5 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-b border-gray-100 shadow-sm">
+        <button onclick="window._clearFilters()" class="cat-filter shrink-0 bg-coral text-white px-4 py-1.5 rounded-full text-xs font-bold">All</button>
+        <button onclick="window._toggleOpen(this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">🟢 Open Now</button>
+        <button onclick="window._toggleRating(this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">⭐ Top Rated</button>
+        <button onclick="window._toggleTag('halal', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">☪️ Halal</button>
+        <button onclick="window._toggleTag('wifi', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">📶 Wi-Fi</button>
+        <button onclick="window._toggleTag('football', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">⚽ Football</button>
+        <button onclick="window._toggleTag('outlets', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">🔌 Outlets</button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 pb-24 no-scrollbar">
+        <div id="restaurant-feed" class="space-y-4"></div>
+        <div id="pagination"></div>
+    </div>
+
+    <div class="absolute bottom-4 left-0 w-full px-4">
+        <a href="/food/merchant" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl shadow-lg text-sm flex items-center justify-center gap-2 active:scale-95 transition">
+            <i class="fas fa-store"></i> List My Restaurant
+        </a>
+    </div>
+</div>
+
+<div id="map-overlay" class="hidden absolute inset-0 z-[100] flex flex-col fade-in">
+    <div class="bg-white w-full h-[95%] mt-auto rounded-t-3xl flex flex-col overflow-hidden slide-up shadow-2xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center px-4 pt-4 pb-2 shrink-0">
+            <div>
+                <h3 class="font-bold text-gray-900 text-base leading-none">Restaurants Map</h3>
+                <p id="map-count" class="text-[10px] text-gray-400 mt-0.5">Loading...</p>
+            </div>
+            <button onclick="window._closeMap()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-times text-gray-600 text-sm"></i>
+            </button>
+        </div>
+        <!-- Search bar -->
+        <div class="px-4 pb-3 shrink-0">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                <input id="map-search" type="text" placeholder="Search restaurant or location..."
+                       class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-8 pr-4 py-2 text-sm outline-none focus:border-coral transition"
+                       oninput="window._mapSearch(this.value)">
+            </div>
+        </div>
+        <!-- Map -->
+        <div id="leaflet-map" class="flex-1"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { renderFeed, openRestaurant } from '/js/food/feed.js';
+    import { toggleOpen, toggleRating, toggleTag, setSearch, clearAll } from '/js/food/filters.js';
+    import { openMap, closeMap, mapSearch } from '/js/food/map.js';
+
+    let currentPage = 1;
+    let currentFilters = {};
+
+    renderFeed(1, currentFilters);
+
+    window._changePage = (page) => {
+        currentPage = page;
+        renderFeed(page, currentFilters);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window._openRestaurant = openRestaurant;
+    window._openMap    = openMap;
+    window._mapSearch  = mapSearch;
+    window._closeMap = closeMap;
+
+    window._toggleOpen   = (btn) => toggleOpen(btn);
+    window._toggleRating = (btn) => toggleRating(btn);
+    window._toggleTag    = (tag, btn) => toggleTag(tag, btn);
+
+    window._clearFilters = () => clearAll();
+
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        clearTimeout(window._searchDebounce);
+        window._searchDebounce = setTimeout(() => setSearch(e.target.value), 350);
+    });
+</script>
+</body>
+</html>

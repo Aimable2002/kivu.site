@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>List My Restaurant — Kivu Food</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .bg-coral   { background-color:#FF7F50 }
+        .text-coral { color:#FF7F50 }
+        .border-coral { border-color:#FF7F50 }
+        .focus\:border-coral:focus { border-color:#FF7F50 }
+        .no-scrollbar::-webkit-scrollbar { display:none }
+        .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none }
+        #map-picker { height:200px; border-radius:12px; overflow:hidden; border:2px solid #e5e7eb }
+        #map-picker.active { border-color:#FF7F50 }
+        .tag-pill input[type=checkbox] { display:none }
+        .tag-pill label {
+            display:inline-flex; align-items:center; gap:6px;
+            border:1.5px solid #e5e7eb; border-radius:999px;
+            padding:6px 14px; font-size:12px; font-weight:700;
+            cursor:pointer; color:#6b7280; transition:all .15s; user-select:none;
+        }
+        .tag-pill input:checked + label { background:#FF7F50; border-color:#FF7F50; color:#fff }
+        .step { display:none }
+        .step.active { display:block }
+        .step-dot { width:8px; height:8px; border-radius:50%; background:#e5e7eb; transition:background .2s }
+        .step-dot.active { background:#FF7F50 }
+        .step-dot.done { background:#22c55e }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full bg-white shadow-2xl flex flex-col">
+
+    <!-- Header -->
+    <div class="bg-coral text-white pt-10 pb-4 px-4 shrink-0">
+        <div class="flex items-center gap-3 mb-3">
+            <a href="/food" class="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">List My Restaurant</h1>
+                <p class="text-[10px] text-white/80">Join Kivu Food directory</p>
+            </div>
+        </div>
+        <!-- Step indicators -->
+        <div class="flex items-center justify-center gap-2">
+            <div class="step-dot active" id="dot-1"></div>
+            <div class="h-px w-8 bg-white/30"></div>
+            <div class="step-dot" id="dot-2"></div>
+            <div class="h-px w-8 bg-white/30"></div>
+            <div class="step-dot" id="dot-3"></div>
+            <div class="h-px w-8 bg-white/30"></div>
+            <div class="step-dot" id="dot-4"></div>
+        </div>
+        <div class="flex justify-center gap-8 mt-1">
+            <span class="text-[9px] text-white/70 font-bold">Info</span>
+            <span class="text-[9px] text-white/70 font-bold">Location</span>
+            <span class="text-[9px] text-white/70 font-bold">Menu</span>
+            <span class="text-[9px] text-white/70 font-bold">Review</span>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto no-scrollbar">
+
+        <!-- ── STEP 1: Basic Info ─────────────────────────── -->
+        <div class="step active p-5 space-y-4" id="step-1">
+
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex gap-2">
+                <i class="fas fa-info-circle text-amber-500 mt-0.5 shrink-0 text-sm"></i>
+                <p class="text-xs text-amber-800 leading-relaxed">Fill in your restaurant details. Our team reviews within 24 hours. Once approved everything goes live automatically.</p>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-gray-600 mb-1 block">Restaurant Name *</label>
+                <input id="m-name" type="text" placeholder="e.g. Mama Africa Cafe"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-coral transition">
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-gray-600 mb-1 block">Category</label>
+                <select id="m-category" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none transition bg-white text-gray-700">
+                    <option>Restaurant</option>
+                    <option>Cafe</option>
+                    <option>Fast Food</option>
+                    <option>Grill</option>
+                    <option>Bakery</option>
+                    <option>Bar</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-gray-600 mb-1 block">Description</label>
+                <textarea id="m-desc" rows="3" placeholder="What makes your place special..."
+                          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-coral resize-none transition"></textarea>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-gray-600 mb-1 block">WhatsApp / Phone *</label>
+                <input id="m-phone" type="tel" placeholder="+250 788 000 000"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-coral transition">
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-gray-600 mb-1 block">Opening Hours</label>
+                <input id="m-hours" type="text" placeholder="e.g. 08:00 – 23:00"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-coral transition">
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-gray-600 mb-1 block">Cover Photo URL <span class="text-gray-400 font-normal">(optional)</span></label>
+                <input id="m-cover" type="url" placeholder="https://..."
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-coral transition">
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-gray-600 mb-1 block">YouTube Video <span class="text-gray-400 font-normal">(optional)</span></label>
+                <input id="m-youtube" type="url" placeholder="https://youtube.com/..."
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-coral transition">
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-gray-600 mb-2 block">Amenities & Features</label>
+                <div class="flex flex-wrap gap-2">
+                    <div class="tag-pill"><input type="checkbox" id="tag-wifi" value="wifi"><label for="tag-wifi">📶 Wi-Fi</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-halal" value="halal"><label for="tag-halal">☪️ Halal</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-parking" value="parking"><label for="tag-parking">🚗 Parking</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-football" value="football"><label for="tag-football">⚽ Football</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-outlets" value="outlets"><label for="tag-outlets">🔌 Outlets</label></div>
+                </div>
+            </div>
+
+            <p id="s1-msg" class="hidden text-xs text-red-500 font-medium text-center"></p>
+            <button onclick="goToStep(2)"
+                    class="w-full bg-coral text-white font-bold py-3.5 rounded-xl active:scale-95 transition text-sm">
+                Next: Location →
+            </button>
+        </div>
+
+        <!-- ── STEP 2: Location ──────────────────────────── -->
+        <div class="step p-5 space-y-3" id="step-2">
+            <h3 class="font-bold text-gray-900 text-base">Pin Your Location</h3>
+            <p class="text-xs text-gray-400">Customers will find you on the map. Tap the map or use GPS.</p>
+
+            <input id="m-address" type="text" placeholder="Type address or tap map to auto-fill..."
+                   class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-coral transition">
+
+            <button type="button" onclick="useMyLocation()" id="location-btn"
+                    class="w-full border border-gray-200 rounded-xl py-2.5 text-xs font-bold text-gray-600 flex items-center justify-center gap-2 active:scale-95 transition hover:border-coral hover:text-coral">
+                <i class="fas fa-crosshairs"></i> Use My Current Location
+            </button>
+
+            <div id="map-picker"></div>
+            <div id="map-coords" class="hidden text-[10px] text-green-600 font-bold text-center">
+                <i class="fas fa-check-circle"></i> <span id="coords-text"></span>
+            </div>
+            <p id="map-hint" class="text-[10px] text-gray-400 text-center">Tap anywhere on the map to drop a pin</p>
+
+            <input type="hidden" id="m-lat">
+            <input type="hidden" id="m-lng">
+
+            <p id="s2-msg" class="hidden text-xs text-red-500 font-medium text-center"></p>
+            <div class="flex gap-3 pt-2">
+                <button onclick="goToStep(1)" class="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-xl text-sm active:scale-95 transition">← Back</button>
+                <button onclick="goToStep(3)" class="flex-1 bg-coral text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition">Next: Menu →</button>
+            </div>
+        </div>
+
+        <!-- ── STEP 3: Menu Builder ─────────────────────── -->
+        <div class="step p-5" id="step-3">
+            <h3 class="font-bold text-gray-900 text-base mb-1">Build Your Menu</h3>
+            <p class="text-xs text-gray-400 mb-4">Add categories (e.g. Main Dishes, Drinks) then add items to each.</p>
+
+            <div id="menu-builder" class="space-y-4 mb-4"></div>
+
+            <button onclick="addCategory()"
+                    class="w-full border-2 border-dashed border-gray-200 text-gray-400 font-bold py-3 rounded-xl text-sm hover:border-coral hover:text-coral transition flex items-center justify-center gap-2">
+                <i class="fas fa-plus"></i> Add Category
+            </button>
+
+            <p class="text-[10px] text-gray-400 text-center mt-3">You can always add more menu items later from the admin panel.</p>
+
+            <div class="flex gap-3 pt-4">
+                <button onclick="goToStep(2)" class="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-xl text-sm active:scale-95 transition">← Back</button>
+                <button onclick="goToStep(4)" class="flex-1 bg-coral text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition">Review →</button>
+            </div>
+        </div>
+
+        <!-- ── STEP 4: Review & Submit ────────────────────── -->
+        <div class="step p-5" id="step-4">
+            <h3 class="font-bold text-gray-900 text-base mb-4">Review & Submit</h3>
+
+            <div id="review-summary" class="space-y-3 mb-5"></div>
+
+            <p id="s4-msg" class="hidden text-xs text-red-500 font-medium text-center mb-3"></p>
+
+            <div class="flex gap-3">
+                <button onclick="goToStep(3)" class="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-xl text-sm active:scale-95 transition">← Back</button>
+                <button id="m-submit" onclick="submitApplication()"
+                        class="flex-1 bg-coral text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition shadow-md">
+                    Submit Application
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Success screen (outside steps) -->
+    <div id="m-success" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-green-500 text-3xl"></i>
+        </div>
+        <h3 class="font-bold text-gray-900 text-xl mb-2">Application Submitted!</h3>
+        <p class="text-sm text-gray-500 mb-6 leading-relaxed">Our team will review within 24 hours. Once approved, your restaurant and full menu will go live automatically.</p>
+        <a href="/food" class="bg-coral text-white font-bold px-8 py-3 rounded-xl text-sm inline-block">Back to Feed</a>
+    </div>
+</div>
+
+<!-- Leaflet for map picker -->
+<script>
+(function() {
+    const link   = document.createElement('link');
+    link.rel     = 'stylesheet';
+    link.href    = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+    const script = document.createElement('script');
+    script.src   = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = initMapPicker;
+    document.head.appendChild(script);
+})();
+
+let _map, _marker;
+
+function initMapPicker() {
+    _map = L.map('map-picker').setView([-1.9441, 30.0619], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(_map);
+    _map.on('click', e => placePin(e.latlng.lat, e.latlng.lng));
+    document.getElementById('map-picker').classList.add('active');
+    // Invalidate size when step 2 becomes visible
+    setTimeout(() => _map && _map.invalidateSize(), 300);
+}
+
+function placePin(lat, lng) {
+    if (_marker) _marker.remove();
+    _marker = L.marker([lat, lng], {
+        icon: L.divIcon({
+            className: '',
+            html: '<div style="width:24px;height:24px;background:#FF7F50;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>',
+            iconAnchor: [12, 12]
+        })
+    }).addTo(_map);
+    document.getElementById('m-lat').value = lat.toFixed(7);
+    document.getElementById('m-lng').value = lng.toFixed(7);
+    document.getElementById('coords-text').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    document.getElementById('map-coords').classList.remove('hidden');
+    document.getElementById('map-hint').textContent = 'Pin placed! Tap again to move it.';
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+        .then(r => r.json())
+        .then(d => { document.getElementById('m-address').value = d.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`; })
+        .catch(() => { document.getElementById('m-address').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`; });
+}
+
+window.useMyLocation = function() {
+    if (!navigator.geolocation) return;
+    const btn = document.getElementById('location-btn');
+    if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Locating...'; btn.disabled = true; }
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            if (_map) _map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+            placePin(pos.coords.latitude, pos.coords.longitude);
+            if (btn) { btn.innerHTML = '<i class="fas fa-crosshairs"></i> Use My Current Location'; btn.disabled = false; }
+        },
+        () => {
+            if (btn) { btn.innerHTML = '<i class="fas fa-crosshairs"></i> Use My Current Location'; btn.disabled = false; }
+            alert('Could not get location. Tap the map manually.');
+        }
+    );
+};
+</script>
+
+<!-- Menu Builder + Step Navigation -->
+<script>
+let _currentStep = 1;
+let _catCount    = 0;
+
+function goToStep(n) {
+    // Validate before leaving current step
+    if (_currentStep === 1 && n > 1) {
+        const name  = document.getElementById('m-name').value.trim();
+        const phone = document.getElementById('m-phone').value.trim();
+        if (!name)  { showMsg('s1-msg', 'Restaurant name is required.');  return; }
+        if (!phone) { showMsg('s1-msg', 'Phone number is required.'); return; }
+    }
+    if (_currentStep === 2 && n > 2) {
+        // Invalidate map size when re-entering step 2
+    }
+    if (n === 4) buildReviewSummary();
+    if (n === 2) setTimeout(() => { if (_map) _map.invalidateSize(); }, 200);
+
+    document.getElementById('step-' + _currentStep).classList.remove('active');
+    document.getElementById('step-' + n).classList.add('active');
+
+    // Update dots
+    for (let i = 1; i <= 4; i++) {
+        const dot = document.getElementById('dot-' + i);
+        dot.classList.remove('active','done');
+        if (i < n)      dot.classList.add('done');
+        else if (i === n) dot.classList.add('active');
+    }
+    _currentStep = n;
+    // Scroll to top of scrollable area
+    document.querySelector('.flex-1.overflow-y-auto')?.scrollTo({ top:0, behavior:'smooth' });
+}
+
+// ── Menu Builder ─────────────────────────────────────────────
+
+function addCategory() {
+    _catCount++;
+    const id  = 'cat-' + _catCount;
+    const div = document.createElement('div');
+    div.id        = id;
+    div.className = 'border border-gray-200 rounded-xl overflow-hidden';
+    div.innerHTML = `
+    <div class="bg-gray-50 px-3 py-2.5 flex items-center gap-2 border-b border-gray-200">
+        <input type="text" placeholder="Category name * (e.g. Main Dishes, Drinks)"
+               id="${id}-name"
+               class="flex-1 bg-transparent text-sm font-bold text-gray-800 outline-none placeholder-red-300"
+               style="min-width:0">
+        <button onclick="removeCategory('${id}')" class="text-gray-300 hover:text-red-400 transition text-sm">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div id="${id}-items" class="divide-y divide-gray-100"></div>
+    <button onclick="addItem('${id}')"
+            class="w-full py-2.5 text-xs text-gray-400 hover:text-coral font-bold flex items-center justify-center gap-1 transition">
+        <i class="fas fa-plus text-[10px]"></i> Add Item
+    </button>`;
+    document.getElementById('menu-builder').appendChild(div);
+    document.getElementById(id + '-name').focus();
+    addItem(id); // auto-add first item
+}
+
+function removeCategory(catId) {
+    document.getElementById(catId)?.remove();
+}
+
+let _itemCount = 0;
+function addItem(catId) {
+    _itemCount++;
+    const itemId = catId + '-item-' + _itemCount;
+    const row    = document.createElement('div');
+    row.id        = itemId;
+    row.className = 'p-3 space-y-2 bg-white';
+    row.innerHTML = `
+    <div class="flex gap-2 items-start">
+        <div class="flex-1 space-y-1.5">
+            <input type="text" placeholder="Item name *"
+                   id="${itemId}-name"
+                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-coral transition">
+            <input type="text" placeholder="Description (optional)"
+                   id="${itemId}-desc"
+                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-coral transition">
+            <div class="flex gap-2">
+                <div class="relative flex-1">
+                    <input type="number" placeholder="Price" min="0"
+                           id="${itemId}-price"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-coral transition pr-12">
+                    <span class="absolute right-2 top-2 text-[9px] text-gray-400 font-bold">RWF</span>
+                </div>
+                <input type="url" placeholder="Image URL (opt.)"
+                       id="${itemId}-img"
+                       class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-coral transition">
+            </div>
+        </div>
+        <button onclick="document.getElementById('${itemId}').remove()"
+                class="text-gray-300 hover:text-red-400 transition mt-1 shrink-0">
+            <i class="fas fa-times text-sm"></i>
+        </button>
+    </div>`;
+    document.getElementById(catId + '-items').appendChild(row);
+}
+
+// ── Review Summary ────────────────────────────────────────────
+function buildReviewSummary() {
+    const name     = document.getElementById('m-name').value.trim();
+    const category = document.getElementById('m-category').value;
+    const phone    = document.getElementById('m-phone').value.trim();
+    const address  = document.getElementById('m-address').value.trim();
+    const hours    = document.getElementById('m-hours').value.trim();
+    const tags     = Array.from(document.querySelectorAll('.tag-pill input:checked')).map(c => c.value);
+    const hasPin   = document.getElementById('m-lat').value;
+
+    const menuData = collectMenuData();
+    const itemCount = menuData.reduce((s, c) => s + c.items.length, 0);
+
+    document.getElementById('review-summary').innerHTML = `
+    <div class="bg-gray-50 rounded-xl border border-gray-100 p-4 space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-gray-500">Name</span><span class="font-bold text-gray-900">${name}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Category</span><span class="font-medium text-gray-700">${category}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Phone</span><span class="font-medium text-gray-700">${phone}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Hours</span><span class="font-medium text-gray-700">${hours || '–'}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Address</span><span class="font-medium text-gray-700 text-right max-w-[60%]">${address || '–'}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Map Pin</span><span class="${hasPin ? 'text-green-600' : 'text-gray-400'} font-medium">${hasPin ? '✓ Set' : 'Not set'}</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Tags</span><span class="font-medium text-gray-700">${tags.length ? tags.join(', ') : '–'}</span></div>
+    </div>
+    <div class="bg-gray-50 rounded-xl border border-gray-100 p-4">
+        <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-gray-700 uppercase tracking-wide">Menu</span>
+            <span class="text-xs text-gray-400">${menuData.length} categories · ${itemCount} items</span>
+        </div>
+        ${menuData.length === 0
+            ? '<p class="text-xs text-gray-400">No menu added — you can add it later.</p>'
+            : menuData.map(cat => `
+                <div class="mb-2">
+                    <p class="text-xs font-bold text-gray-800">${cat.name}</p>
+                    ${cat.items.map(it => `
+                    <div class="flex justify-between text-xs text-gray-500 pl-3 py-0.5">
+                        <span>${it.name}</span>
+                        <span class="font-medium text-coral">${Number(it.price).toLocaleString()} RWF</span>
+                    </div>`).join('')}
+                </div>`).join('')}
+    </div>`;
+}
+
+function collectMenuData() {
+    const cats = [];
+    document.querySelectorAll('#menu-builder > div[id^="cat-"]').forEach(catEl => {
+        const catId   = catEl.id;
+        const catName = document.getElementById(catId + '-name')?.value.trim() || 'Menu';
+
+        const items = [];
+        // Select only direct item row divs inside the -items container
+        const itemsContainer = document.getElementById(catId + '-items');
+        if (itemsContainer) {
+            itemsContainer.querySelectorAll(':scope > div[id^="' + catId + '-item-"]').forEach(itemEl => {
+                const itemId = itemEl.id;
+                const iname  = document.getElementById(itemId + '-name')?.value.trim();
+                const price  = document.getElementById(itemId + '-price')?.value.trim();
+                if (!iname) return;
+                items.push({
+                    name:        iname,
+                    description: document.getElementById(itemId + '-desc')?.value.trim()  || '',
+                    price:       price ? parseInt(price) : 0,
+                    image_url:   document.getElementById(itemId + '-img')?.value.trim()   || ''
+                });
+            });
+        }
+        cats.push({ name: catName, items }); // push even if no items yet
+    });
+    return cats;
+}
+
+function showMsg(elId, text) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 4000);
+}
+</script>
+
+<script type="module">
+import { supabase } from '/js/supabase.js';
+
+window.submitApplication = async function() {
+    const btn  = document.getElementById('m-submit');
+    const msg  = document.getElementById('s4-msg');
+    const name = document.getElementById('m-name').value.trim();
+    const phone= document.getElementById('m-phone').value.trim();
+
+    if (!name || !phone) { showMsg('s4-msg', 'Name and phone are required.'); return; }
+
+    btn.disabled = true; btn.textContent = 'Submitting...';
+
+    const lat      = document.getElementById('m-lat').value;
+    const lng      = document.getElementById('m-lng').value;
+    const tags     = Array.from(document.querySelectorAll('.tag-pill input:checked')).map(c => c.value);
+    const menuData = collectMenuData();
+
+    const { error } = await supabase.from('merchant_applications').insert({
+        name,
+        description:     document.getElementById('m-desc').value.trim()    || null,
+        category:        document.getElementById('m-category').value        || 'Restaurant',
+        address:         document.getElementById('m-address').value.trim()  || null,
+        lat:             lat ? parseFloat(lat) : null,
+        lng:             lng ? parseFloat(lng) : null,
+        phone,
+        hours:           document.getElementById('m-hours').value.trim()    || null,
+        youtube_url:     document.getElementById('m-youtube')?.value.trim() || null,
+        cover_image_url: document.getElementById('m-cover')?.value.trim()   || null,
+        tags,
+        menu_data:       menuData,
+        status: 'pending'
+    });
+
+    btn.disabled = false; btn.textContent = 'Submit Application';
+
+    if (error) { showMsg('s4-msg', 'Failed: ' + error.message); return; }
+
+    document.querySelector('.flex-1.overflow-y-auto').classList.add('hidden');
+    document.getElementById('m-success').classList.remove('hidden');
+};
+</script>
+</body>
+</html>

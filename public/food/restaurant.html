@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Restaurant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fade-in  { animation: fadeIn .3s ease-in-out; }
+        .slide-up { animation: slideUp .4s ease-out forwards; }
+        @keyframes fadeIn  { from { opacity:0 } to { opacity:1 } }
+        @keyframes slideUp { from { transform:translateY(100%) } to { transform:translateY(0) } }
+        .no-scrollbar::-webkit-scrollbar { display:none }
+        .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none }
+        .bg-coral   { background-color:#FF7F50 }
+        .text-coral { color:#FF7F50 }
+        .border-coral { border-color:#FF7F50 }
+        .focus\:border-coral:focus { border-color:#FF7F50 }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full relative shadow-2xl overflow-hidden bg-white flex flex-col">
+
+    <div class="h-52 relative bg-gray-900 shrink-0">
+        <img id="resto-cover" src="" class="w-full h-full object-cover opacity-80"
+             onerror="this.style.display='none'">
+        <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/30"></div>
+
+        <button onclick="window._goBack()" class="absolute top-10 left-4 bg-black/40 text-white w-9 h-9 rounded-full flex items-center justify-center z-10 backdrop-blur">
+            <i class="fas fa-arrow-left text-sm"></i>
+        </button>
+
+        <button id="youtube-play-btn" class="hidden absolute inset-0 m-auto w-14 h-14 bg-white/20 backdrop-blur text-white border-2 border-white rounded-full flex items-center justify-center z-10 hover:bg-white hover:text-coral transition">
+            <i class="fas fa-play text-lg ml-1"></i>
+        </button>
+
+        <div id="youtube-frame" class="hidden absolute inset-0 z-20"></div>
+    </div>
+
+    <div class="px-4 pt-3 pb-3 shrink-0 bg-white border-b border-gray-100">
+        <div class="flex justify-between items-start mb-1">
+            <div>
+                <h1 id="resto-name" class="text-xl font-black text-gray-900 leading-tight"></h1>
+                <p id="resto-category" class="text-xs text-gray-400 mt-0.5"></p>
+            </div>
+            <span id="resto-status" class="text-[10px] font-bold px-2 py-1 rounded shrink-0 mt-1"></span>
+        </div>
+        <p id="resto-address" class="text-xs text-gray-500 mb-3"></p>
+
+        <div class="flex gap-3 items-center mb-3">
+            <span class="text-amber-400 text-sm font-bold flex items-center gap-1">
+                <i class="fas fa-star"></i>
+                <span id="rating-avg">–</span>
+            </span>
+            <span id="rating-count" class="text-xs text-gray-400"></span>
+            <button id="qr-btn" onclick="window._generateQR(this.dataset.id)"
+                    class="ml-auto bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 active:scale-95 transition">
+                <i class="fas fa-qrcode"></i> QR Code
+            </button>
+        </div>
+
+        <div class="flex gap-0 border-b border-gray-100">
+            <button onclick="switchTab('menu')" id="tab-menu"
+                    class="flex-1 py-2.5 text-xs font-bold border-b-2 border-coral text-coral">
+                Menu
+            </button>
+            <button onclick="switchTab('reviews')" id="tab-reviews"
+                    class="flex-1 py-2.5 text-xs font-bold border-b-2 border-transparent text-gray-400">
+                Reviews
+            </button>
+            <button onclick="switchTab('info')" id="tab-info"
+                    class="flex-1 py-2.5 text-xs font-bold border-b-2 border-transparent text-gray-400">
+                Info
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 pb-24 no-scrollbar bg-gray-50">
+        <div id="view-menu" class="fade-in"></div>
+        <div id="view-reviews" class="hidden fade-in"></div>
+        <div id="view-info" class="hidden fade-in"></div>
+    </div>
+
+    <div class="bg-white border-t border-gray-100 p-3 shrink-0 flex gap-3 items-center">
+        <button id="cart-btn" onclick="window._openCart()" class="hidden relative bg-coral text-white w-12 h-12 rounded-xl flex items-center justify-center active:scale-95 transition shadow-md">
+            <i class="fas fa-shopping-bag text-lg"></i>
+            <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-gray-900 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center"></span>
+        </button>
+        <button id="whatsapp-order-btn"
+                onclick="window._checkout()"
+                class="flex-1 bg-coral text-white font-bold py-3.5 rounded-xl shadow flex justify-center items-center gap-2 active:scale-95 transition text-sm">
+            <i class="fab fa-whatsapp text-lg"></i> Order via WhatsApp
+        </button>
+    </div>
+
+    <div id="cart-flash" class="hidden opacity-0 absolute top-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg z-50 transition-opacity duration-300"></div>
+</div>
+
+<div id="cart-drawer" class="hidden absolute inset-0 z-[100] bg-black/60 flex flex-col justify-end fade-in">
+    <div class="bg-white w-full rounded-t-3xl p-5 slide-up max-h-[75%] flex flex-col shadow-2xl">
+        <div class="flex justify-between items-center mb-4 shrink-0">
+            <h3 class="font-bold text-gray-900 text-lg">Your Order</h3>
+            <button onclick="window._closeCart()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-times text-gray-600"></i>
+            </button>
+        </div>
+        <div id="cart-list" class="flex-1 overflow-y-auto no-scrollbar mb-4"></div>
+        <div class="border-t border-gray-100 pt-3 shrink-0">
+            <div class="flex justify-between items-center mb-3">
+                <span class="font-bold text-gray-700 text-sm">Total</span>
+                <span id="cart-total" class="font-black text-coral text-lg">0 RWF</span>
+            </div>
+            <button onclick="window._checkout()"
+                    class="w-full bg-coral text-white font-bold py-3.5 rounded-xl active:scale-95 transition flex items-center justify-center gap-2 text-sm">
+                <i class="fab fa-whatsapp text-lg"></i> Confirm & Order via WhatsApp
+            </button>
+            <p class="text-center text-[9px] text-gray-400 mt-2 uppercase tracking-wider">0% commission — direct to restaurant</p>
+        </div>
+    </div>
+</div>
+
+<div id="qr-modal" class="hidden absolute inset-0 z-[100] bg-black/60 flex items-center justify-center fade-in px-6">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl text-center">
+        <h3 class="font-bold text-gray-900 mb-1">Table QR Code</h3>
+        <p class="text-xs text-gray-400 mb-4">Print and place on tables. Customers scan to order.</p>
+        <div id="qr-box" class="flex justify-center mb-3"></div>
+        <p id="qr-url-label" class="text-[9px] text-gray-300 break-all mb-4"></p>
+        <button onclick="window._closeQR()" class="w-full bg-gray-900 text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition">Close</button>
+    </div>
+</div>
+
+<script type="module">
+    import { loadRestaurant, goBack }           from '/js/food/restaurant.js';
+    import { renderMenu, addItemToCart }        from '/js/food/menu.js';
+    import { renderReviews, setRating, submitReview } from '/js/food/reviews.js';
+    import { addToCart, removeFromCart, openCartDrawer, closeCartDrawer, checkoutWhatsApp, renderCartBadge } from '/js/food/cart.js';
+    import { generateQR, closeQR }              from '/js/food/qr.js';
+    import { supabase }                         from '/js/supabase.js';
+
+    (async () => {
+    const resto = await loadRestaurant();
+    if (!resto) return;
+
+    await renderMenu(resto.id);
+
+    window._goBack       = goBack;
+    window._addToCart     = (id) => addItemToCart(id);
+    window._removeFromCart= (id)   => removeFromCart(id);
+    window._openCart      = ()     => openCartDrawer();
+    window._closeCart     = ()     => closeCartDrawer();
+    window._generateQR    = (id)   => generateQR(id);
+    window._closeQR       = ()     => closeQR();
+    window._setRating     = (v)    => setRating(v);
+    window._submitReview  = (id)   => submitReview(id);
+    window._checkout      = ()     => checkoutWhatsApp(resto.id, document.getElementById('whatsapp-order-btn').dataset.phone);
+
+    window.switchTab = async (tab) => {
+        ['menu','reviews','info'].forEach(t => {
+            document.getElementById('view-' + t).classList.toggle('hidden', t !== tab);
+            const btn = document.getElementById('tab-' + t);
+            btn.classList.toggle('border-coral',      t === tab);
+            btn.classList.toggle('text-coral',        t === tab);
+            btn.classList.toggle('border-transparent', t !== tab);
+            btn.classList.toggle('text-gray-400',     t !== tab);
+        });
+
+        if (tab === 'reviews') await renderReviews(resto.id);
+
+        if (tab === 'info') {
+            const { data } = await supabase
+                .from('restaurants_with_rating')
+                .select('phone, hours, tags, address')
+                .eq('id', resto.id).single();
+
+            if (data) {
+                const hours = data.hours
+                    ? Object.entries(data.hours).map(([d,h]) => `<span class="capitalize font-medium text-gray-700">${d}</span>: ${h}`).join('<br>')
+                    : 'Not available';
+                const tagMap = { wifi:'📶 Wi-Fi', halal:'☪️ Halal', parking:'🚗 Parking', football:'⚽ Football', outlets:'🔌 Outlets' };
+                const tags   = (data.tags || []).map(t => tagMap[t] || t).join(', ') || 'None listed';
+                document.getElementById('view-info').innerHTML = `
+                <div class="bg-white p-4 rounded-xl border border-gray-100 space-y-4 text-sm text-gray-600">
+                    <div class="flex gap-3"><i class="far fa-clock text-coral mt-0.5 w-4"></i><div><b class="text-gray-900 block mb-1">Opening Hours</b>${hours}</div></div>
+                    <div class="flex gap-3"><i class="fas fa-phone-alt text-coral mt-0.5 w-4"></i><div><b class="text-gray-900">Phone</b><br>${data.phone || '–'}</div></div>
+                    <div class="flex gap-3"><i class="fas fa-map-marker-alt text-coral mt-0.5 w-4"></i><div><b class="text-gray-900">Address</b><br>${data.address || '–'}</div></div>
+                    <div class="flex gap-3"><i class="fas fa-tags text-coral mt-0.5 w-4"></i><div><b class="text-gray-900">Amenities</b><br>${tags}</div></div>
+                </div>`;
+            }
+        }
+    };
+    })();
+</script>
+</body>
+</html>
