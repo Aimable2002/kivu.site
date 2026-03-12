@@ -34,7 +34,15 @@ export async function loadRestaurant() {
         : 'text-[10px] font-bold px-2 py-1 rounded bg-red-100 text-red-400 border border-red-200';
 
     const cover = document.getElementById('resto-cover');
-    if (cover && r.cover_image_url) cover.src = r.cover_image_url;
+    if (cover) {
+        cover.style.display = '';          // always clear any hidden state first
+        if (r.cover_image_url) {
+            cover.src = r.cover_image_url;
+            cover.onerror = () => { cover.style.display = 'none'; };
+        } else {
+            cover.style.display = 'none';
+        }
+    }
 
     const playBtn = document.getElementById('youtube-play-btn');
     if (!r.youtube_url) {
@@ -65,8 +73,16 @@ export function goBack() {
 function loadYoutube(url) {
     const videoId = url.match(/(?:v=|youtu\.be\/)([^&\s]+)/)?.[1];
     if (!videoId) return;
+
     const frame   = document.getElementById('youtube-frame');
     const playBtn = document.getElementById('youtube-play-btn');
+    const cover   = document.getElementById('resto-cover');
+    const overlay = document.getElementById('hero-gradient');
+
+    // Hide cover + gradient, show iframe filling the full hero
+    if (cover)   cover.classList.add('hidden');
+    if (overlay) overlay.classList.add('hidden');
+
     frame.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${videoId}?autoplay=1"
         frameborder="0" allow="autoplay;encrypted-media" allowfullscreen></iframe>`;
     frame.classList.remove('hidden');

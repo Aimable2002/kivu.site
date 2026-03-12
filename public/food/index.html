@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kivu Food</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -59,7 +59,7 @@
         <div id="pagination"></div>
     </div>
 
-    <div class="absolute bottom-12 left-0 w-full px-4">
+    <div class="absolute bottom-0 left-0 w-full px-4" style="padding-bottom: max(1rem, env(safe-area-inset-bottom))">
         <a href="/food/merchant" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl shadow-lg text-sm flex items-center justify-center gap-2 active:scale-95 transition">
             <i class="fas fa-store"></i> List My Restaurant
         </a>
