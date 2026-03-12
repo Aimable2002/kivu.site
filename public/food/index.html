@@ -59,11 +59,13 @@
         <div id="pagination"></div>
     </div>
 
-    <div class="absolute bottom-0 left-0 w-full px-4" style="padding-bottom: max(1rem, env(safe-area-inset-bottom))">
-        <a href="/food/merchant" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl shadow-lg text-sm flex items-center justify-center gap-2 active:scale-95 transition">
-            <i class="fas fa-store"></i> List My Restaurant
-        </a>
-    </div>
+    <!-- FAB: List My Restaurant -->
+    <a href="/food/merchant"
+       class="absolute right-4 bg-gray-900 text-white rounded-full flex items-center gap-2 px-5 h-14 shadow-xl active:scale-95 transition z-20"
+       style="bottom: max(1.5rem, env(safe-area-inset-bottom))">
+        <i class="fas fa-store text-base"></i>
+        <span class="text-sm font-bold">List My Restaurant</span>
+    </a>
 </div>
 
 <div id="map-overlay" class="hidden absolute inset-0 z-[100] flex flex-col fade-in">
