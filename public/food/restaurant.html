@@ -132,8 +132,17 @@
         <h3 class="font-bold text-gray-900 mb-1">Table QR Code</h3>
         <p class="text-xs text-gray-400 mb-4">Print and place on tables. Customers scan to order.</p>
         <div id="qr-box" class="flex justify-center mb-3"></div>
-        <p id="qr-url-label" class="text-[9px] text-gray-300 break-all mb-4"></p>
-        <button onclick="window._closeQR()" class="w-full bg-gray-900 text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition">Close</button>
+        <p id="qr-url-label" class="text-[9px] text-gray-400 break-all mb-4"></p>
+        <div class="flex gap-2">
+            <button onclick="window._printQR()"
+                    class="flex-1 bg-coral text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition flex items-center justify-center gap-2">
+                <i class="fas fa-print"></i> Print
+            </button>
+            <button onclick="window._closeQR()"
+                    class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl text-sm active:scale-95 transition">
+                Close
+            </button>
+        </div>
     </div>
 </div>
 
@@ -142,7 +151,7 @@
     import { renderMenu, addItemToCart }        from '/js/food/menu.js';
     import { renderReviews, setRating, submitReview } from '/js/food/reviews.js';
     import { addToCart, removeFromCart, openCartDrawer, closeCartDrawer, checkoutWhatsApp, renderCartBadge } from '/js/food/cart.js';
-    import { generateQR, closeQR }              from '/js/food/qr.js';
+    import { generateQR, closeQR, printQR }     from '/js/food/qr.js';
     import { supabase }                         from '/js/supabase.js';
 
     (async () => {
@@ -158,6 +167,7 @@
     window._closeCart     = ()     => closeCartDrawer();
     window._generateQR    = (id)   => generateQR(id);
     window._closeQR       = ()     => closeQR();
+    window._printQR       = ()     => printQR();
     window._setRating     = (v)    => setRating(v);
     window._submitReview  = (id)   => submitReview(id);
     window._checkout      = ()     => checkoutWhatsApp(resto.id, document.getElementById('whatsapp-order-btn').dataset.phone);

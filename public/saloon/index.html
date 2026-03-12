@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Saloons & Barbershops — Kivu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .bg-purple   { background-color:#7C3AED }
+        .text-purple { color:#7C3AED }
+        .border-purple { border-color:#7C3AED }
+        .no-scrollbar::-webkit-scrollbar { display:none }
+        .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full bg-white shadow-2xl flex flex-col relative">
+
+    <!-- Header -->
+    <div style="background:#7C3AED" class="text-white pt-10 pb-4 px-4 shrink-0">
+        <div class="flex items-center justify-between mb-3">
+            <button onclick="window.location.href='/'" class="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </button>
+            <div>
+                <h1 class="font-black text-xl leading-none">Saloons</h1>
+                <p class="text-[11px] text-white/70 mt-0.5">Barbershops & Hair Saloons in Kigali</p>
+            </div>
+            <button onclick="window._openMap()" class="bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <i class="fas fa-map-marker-alt"></i> Map
+            </button>
+        </div>
+        <div class="relative">
+            <i class="fas fa-search absolute left-3 top-3 text-white/60 text-sm"></i>
+            <input id="search-input" type="text" placeholder="Search saloons..."
+                   class="w-full bg-white/20 text-white placeholder-white/60 rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none">
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex gap-2 px-4 py-3 overflow-x-auto no-scrollbar shrink-0 border-b border-gray-100">
+        <button onclick="window._clearFilters()" class="shrink-0 bg-purple-600 text-white px-4 py-1.5 rounded-full text-xs font-bold" style="background:#7C3AED">All</button>
+        <button onclick="window._toggleOpen(this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">🟢 Open Now</button>
+        <button onclick="window._toggleRating(this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">⭐ Top Rated</button>
+        <button onclick="window._toggleTag('men', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">👨 Men</button>
+        <button onclick="window._toggleTag('women', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">👩 Women</button>
+        <button onclick="window._toggleTag('unisex', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">✂️ Unisex</button>
+        <button onclick="window._toggleTag('kids', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">👦 Kids</button>
+    </div>
+
+    <!-- Feed -->
+    <div class="flex-1 overflow-y-auto no-scrollbar px-4 pt-4 pb-24">
+        <div id="saloon-feed" class="space-y-4"></div>
+        <div id="pagination"></div>
+    </div>
+
+    <!-- FAB -->
+    <a href="/saloon/merchant"
+       class="absolute right-4 bg-gray-900 text-white rounded-full flex items-center gap-2 px-5 h-14 shadow-xl active:scale-95 transition z-20"
+       style="bottom: max(2.5rem, env(safe-area-inset-bottom))">
+        <i class="fas fa-scissors text-base"></i>
+        <span class="text-sm font-bold">List My Saloon</span>
+    </a>
+</div>
+
+<!-- Map overlay -->
+<div id="map-overlay" class="hidden absolute inset-0 z-[100] flex flex-col fade-in" style="position:fixed">
+    <div class="bg-white w-full h-[95%] mt-auto rounded-t-3xl flex flex-col overflow-hidden shadow-2xl">
+        <div class="flex justify-between items-center px-4 pt-4 pb-2 shrink-0">
+            <div>
+                <h3 class="font-bold text-gray-900 text-base">Saloons Map</h3>
+                <p id="map-count" class="text-[10px] text-gray-400 mt-0.5">Loading...</p>
+            </div>
+            <button onclick="window._closeMap()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-times text-gray-600 text-sm"></i>
+            </button>
+        </div>
+        <div class="px-4 pb-3 shrink-0">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                <input id="map-search" type="text" placeholder="Search saloon or location..."
+                       class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-8 pr-4 py-2 text-sm outline-none"
+                       oninput="window._mapSearch(this.value)">
+            </div>
+        </div>
+        <div id="leaflet-map" class="flex-1"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { renderFeed, openSaloon } from '/js/saloon/feed.js';
+    import { supabase } from '/js/supabase.js';
+
+    let state = { open: false, rating: false, tags: [], search: '' };
+
+    renderFeed(1, {});
+
+    window._openSaloon   = openSaloon;
+    window._changePage   = (p) => renderFeed(p, state);
+
+    window._toggleOpen = (btn) => {
+        state.open = !state.open;
+        btn.classList.toggle('text-white', state.open);
+        btn.style.background = state.open ? '#7C3AED' : '';
+        renderFeed(1, state);
+    };
+    window._toggleRating = (btn) => {
+        state.rating = !state.rating;
+        btn.classList.toggle('text-white', state.rating);
+        btn.style.background = state.rating ? '#7C3AED' : '';
+        renderFeed(1, state);
+    };
+    window._toggleTag = (tag, btn) => {
+        const idx = state.tags.indexOf(tag);
+        if (idx === -1) { state.tags.push(tag); btn.style.background = '#7C3AED'; btn.classList.add('text-white'); }
+        else { state.tags.splice(idx,1); btn.style.background = ''; btn.classList.remove('text-white'); }
+        renderFeed(1, state);
+    };
+    window._clearFilters = () => { state = { open:false, rating:false, tags:[], search:'' }; document.getElementById('search-input').value = ''; renderFeed(1, {}); };
+
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        clearTimeout(window._sd);
+        window._sd = setTimeout(() => { state.search = e.target.value.trim(); renderFeed(1, state); }, 350);
+    });
+
+    // Simple map
+    window._openMap  = () => { document.getElementById('map-overlay').classList.remove('hidden'); initMap(); };
+    window._closeMap = () => document.getElementById('map-overlay').classList.add('hidden');
+    window._mapSearch = () => {};
+
+    let _mapInit = false;
+    async function initMap() {
+        if (_mapInit) return; _mapInit = true;
+        const link = document.createElement('link'); link.rel = 'stylesheet'; link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(link);
+        const script = document.createElement('script'); script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.onload = async () => {
+            const map = L.map('leaflet-map').setView([-1.9441,30.0619],13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(map);
+            const { data } = await supabase.from('saloons_with_rating').select('id,name,category,lat,lng,is_open,avg_rating').not('lat','is',null);
+            (data||[]).forEach(s => {
+                if (!s.lat||!s.lng) return;
+                L.marker([s.lat,s.lng]).addTo(map).bindPopup(`<b>${s.name}</b><br>${s.category}<br><a href="#" onclick="sessionStorage.setItem('kf_saloon_id','${s.id}');window.location.href='/saloon/detail'" style="color:#7C3AED;font-weight:bold">View →</a>`);
+            });
+            document.getElementById('map-count').textContent = `${(data||[]).length} saloons on map`;
+        };
+        document.head.appendChild(script);
+    }
+</script>
+</body>
+</html>

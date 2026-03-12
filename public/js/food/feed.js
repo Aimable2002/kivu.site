@@ -52,6 +52,7 @@ export async function renderFeed(page = 1, filters = {}) {
 }
 
 function buildCard(r) {
+    console.log('r :', r)
     const vipBorder  = r.is_vip ? 'border-2 border-yellow-400 shadow-md' : 'border border-gray-100 shadow-sm';
     const vipBadge   = r.is_vip
         ? `<div class="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-[9px] font-black uppercase px-2 py-1 rounded shadow-md">⭐ Promoted</div>`
@@ -83,7 +84,7 @@ function buildCard(r) {
             </div>
             <div class="flex items-center gap-1 mb-2 text-[11px] text-amber-500 font-bold">
                 ${stars}
-                <span class="text-gray-500 font-normal ml-1">${r.avg_rating ?? '–'} (${r.review_count ?? 0})</span>
+                <span class="text-gray-500 font-normal ml-1">${r.avg_rating ?? ''} ${r.review_count && r.review_count != 0 ? r.review_count : 'New'}</span>
             </div>
             <div class="flex gap-1 flex-wrap">${tags}</div>
         </div>

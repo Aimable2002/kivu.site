@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>List My Saloon — Kivu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+        #map-picker{height:200px;border-radius:12px;overflow:hidden;border:2px solid #e5e7eb}
+        #map-picker.active{border-color:#7C3AED}
+        .tag-pill input[type=checkbox]{display:none}
+        .tag-pill label{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #e5e7eb;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#6b7280;transition:all .15s;user-select:none}
+        .tag-pill input:checked+label{background:#7C3AED;border-color:#7C3AED;color:#fff}
+        .step{display:none}.step.active{display:block}
+        .step-dot{width:8px;height:8px;border-radius:50%;background:#e5e7eb;transition:background .2s}
+        .step-dot.active{background:#7C3AED}.step-dot.done{background:#22c55e}
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full bg-white shadow-2xl flex flex-col">
+
+    <div class="text-white pt-10 pb-4 px-4 shrink-0" style="background:#7C3AED">
+        <div class="flex items-center gap-3 mb-3">
+            <a href="/saloon" class="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">List My Saloon</h1>
+                <p class="text-[10px] text-white/80">Join Kivu Saloons directory</p>
+            </div>
+        </div>
+        <div class="flex items-center justify-center gap-2">
+            <div class="step-dot active" id="dot-1"></div><div class="h-px w-8 bg-white/30"></div>
+            <div class="step-dot" id="dot-2"></div><div class="h-px w-8 bg-white/30"></div>
+            <div class="step-dot" id="dot-3"></div><div class="h-px w-8 bg-white/30"></div>
+            <div class="step-dot" id="dot-4"></div>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto no-scrollbar">
+
+        <!-- STEP 1: Info -->
+        <div id="step-1" class="step active p-4 py-24 space-y-3">
+            <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase">Step 1 — Basic Info</p>
+            <div id="s1-msg" class="hidden bg-red-50 text-red-500 text-xs font-bold px-3 py-2 rounded-lg"></div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Saloon Name *</label>
+                <input id="m-name" type="text" placeholder="e.g. Kings Barbershop"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Category *</label>
+                <select id="m-category" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none">
+                    <option>Barbershop</option><option>Hair Saloon</option><option>Unisex Saloon</option>
+                    <option>Nail Studio</option><option>Beauty Parlour</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">WhatsApp / Phone *</label>
+                <input id="m-phone" type="tel" placeholder="+250 7XX XXX XXX"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Opening Hours</label>
+                <input id="m-hours" type="text" placeholder="e.g. Mon–Sat 8am–7pm"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Walk-ins or Appointment?</label>
+                <select id="m-booking" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none">
+                    <option value="walkin">Walk-ins Welcome</option>
+                    <option value="appointment">Appointment Only</option>
+                    <option value="both">Both</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Description</label>
+                <textarea id="m-desc" rows="3" placeholder="Describe your saloon and specialties..."
+                          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none resize-none"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Cover Photo URL</label>
+                <input id="m-cover" type="url" placeholder="https://..."
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">YouTube URL <span class="text-gray-400 font-normal">(optional)</span></label>
+                <input id="m-youtube" type="url" placeholder="https://youtube.com/..."
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-2">Tags</label>
+                <div class="flex flex-wrap gap-2">
+                    <div class="tag-pill"><input type="checkbox" id="tag-men"     value="men">    <label for="tag-men">👨 Men</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-women"   value="women">  <label for="tag-women">👩 Women</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-unisex"  value="unisex"> <label for="tag-unisex">✂️ Unisex</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-kids"    value="kids">   <label for="tag-kids">👦 Kids</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-natural" value="natural"><label for="tag-natural">🌿 Natural Hair</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-dreads"  value="dreads"> <label for="tag-dreads">🌀 Dreads</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-parking" value="parking"><label for="tag-parking">🚗 Parking</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-wifi"    value="wifi">   <label for="tag-wifi">📶 Wi-Fi</label></div>
+                </div>
+            </div>
+
+            <button onclick="goToStep(2)" class="w-full text-white font-bold py-3.5 rounded-xl text-sm active:scale-95 transition mt-2" style="background:#7C3AED">
+                Next: Location →
+            </button>
+        </div>
+
+        <!-- STEP 2: Location -->
+        <div id="step-2" class="step p-4 py-24 space-y-3">
+            <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase">Step 2 — Location</p>
+            <p class="text-xs text-gray-500">Tap the map to pin your exact location.</p>
+            <div id="map-picker"></div>
+            <button id="location-btn" onclick="useMyLocation()"
+                    class="w-full border border-gray-200 rounded-xl py-2.5 text-xs font-bold text-gray-600 flex items-center justify-center gap-2 active:scale-95 transition">
+                <i class="fas fa-crosshairs"></i> Use My Current Location
+            </button>
+            <div id="map-coords" class="hidden bg-violet-50 border border-violet-200 rounded-xl px-4 py-2.5 text-xs text-violet-700 font-bold">
+                📍 <span id="coords-text"></span>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Address <span class="text-gray-400 font-normal">(auto-filled from map)</span></label>
+                <input id="m-address" type="text" placeholder="Street address"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none">
+            </div>
+            <input id="m-lat" type="hidden"><input id="m-lng" type="hidden">
+            <p id="map-hint" class="text-[10px] text-gray-400">Tap the map to place your pin</p>
+
+            <div class="flex gap-3 pt-2">
+                <button onclick="goToStep(1)" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl text-sm">← Back</button>
+                <button onclick="goToStep(3)" class="flex-1 text-white font-bold py-3 rounded-xl text-sm" style="background:#7C3AED">Next: Services →</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Services + Staff -->
+        <div id="step-3" class="step p-4 py-24">
+            <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase mb-1">Step 3 — Services & Staff</p>
+            <p class="text-xs text-gray-400 mb-4">Add services with prices. Then add your barbers/stylists.</p>
+
+            <!-- Services -->
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-sm font-black text-gray-800">✂️ Services</p>
+                <button onclick="addServiceCategory()" class="text-xs font-bold px-3 py-1.5 rounded-lg text-white active:scale-95 transition" style="background:#7C3AED">
+                    + Add Category
+                </button>
+            </div>
+            <div id="services-builder" class="space-y-3 mb-6">
+                <p id="svc-placeholder" class="text-xs text-gray-400 italic text-center py-3">No services yet. Tap "+ Add Category".</p>
+            </div>
+
+            <!-- Staff -->
+            <div class="flex justify-between items-center mb-3 border-t border-gray-100 pt-4">
+                <p class="text-sm font-black text-gray-800">👤 Barbers / Stylists</p>
+                <button onclick="addStaff()" class="text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 active:scale-95 transition">
+                    + Add Staff
+                </button>
+            </div>
+            <div id="staff-builder" class="space-y-2 mb-6">
+                <p id="staff-placeholder" class="text-xs text-gray-400 italic text-center py-3">No staff added yet.</p>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="goToStep(2)" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl text-sm">← Back</button>
+                <button onclick="goToStep(4)" class="flex-1 text-white font-bold py-3 rounded-xl text-sm" style="background:#7C3AED">Review →</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: Review -->
+        <div id="step-4" class="step p-4 py-24">
+            <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase mb-4">Step 4 — Review & Submit</p>
+            <div id="review-summary" class="space-y-3 mb-6"></div>
+            <div class="flex gap-3">
+                <button onclick="goToStep(3)" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl text-sm">← Back</button>
+                <button id="m-submit" onclick="submitApplication()" class="flex-1 text-white font-bold py-3 rounded-xl text-sm shadow-md" style="background:#7C3AED">
+                    Submit Application
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="m-success" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-green-500 text-3xl"></i>
+        </div>
+        <h3 class="font-bold text-gray-900 text-xl mb-2">Application Submitted!</h3>
+        <p class="text-sm text-gray-500 mb-6 leading-relaxed">Our team will review within 24 hours. Once approved, your saloon and all services will go live automatically.</p>
+        <a href="/saloon" class="text-white font-bold px-8 py-3 rounded-xl text-sm inline-block" style="background:#7C3AED">Back to Saloons</a>
+    </div>
+</div>
+
+<script>
+(function(){
+    const link=document.createElement('link');link.rel='stylesheet';link.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(link);
+    const s=document.createElement('script');s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';s.onload=initMapPicker;document.head.appendChild(s);
+})();
+let _map,_marker;
+function initMapPicker(){
+    _map=L.map('map-picker').setView([-1.9441,30.0619],14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(_map);
+    _map.on('click',e=>placePin(e.latlng.lat,e.latlng.lng));
+    document.getElementById('map-picker').classList.add('active');
+}
+function placePin(lat,lng){
+    if(_marker)_marker.remove();
+    _marker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div style="width:24px;height:24px;background:#7C3AED;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>',iconAnchor:[12,12]})}).addTo(_map);
+    document.getElementById('m-lat').value=lat.toFixed(7);
+    document.getElementById('m-lng').value=lng.toFixed(7);
+    document.getElementById('coords-text').textContent=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    document.getElementById('map-coords').classList.remove('hidden');
+    document.getElementById('map-hint').textContent='Pin placed! Tap again to move it.';
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`).then(r=>r.json()).then(d=>{document.getElementById('m-address').value=d.display_name||`${lat.toFixed(5)},${lng.toFixed(5)}`;}).catch(()=>{});
+}
+window.useMyLocation=function(){
+    if(!navigator.geolocation)return;
+    const btn=document.getElementById('location-btn');btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Locating...';btn.disabled=true;
+    navigator.geolocation.getCurrentPosition(
+        pos=>{if(_map)_map.setView([pos.coords.latitude,pos.coords.longitude],16);placePin(pos.coords.latitude,pos.coords.longitude);btn.innerHTML='<i class="fas fa-crosshairs"></i> Use My Current Location';btn.disabled=false;},
+        ()=>{btn.innerHTML='<i class="fas fa-crosshairs"></i> Use My Current Location';btn.disabled=false;alert('Could not get location. Tap the map manually.');}
+    );
+};
+</script>
+
+<script>
+let _currentStep=1,_catCount=0,_itemCount=0,_staffCount=0;
+
+function showMsg(id,msg){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),3000);}
+
+function goToStep(n){
+    if(_currentStep===1&&n>1){
+        if(!document.getElementById('m-name').value.trim()){showMsg('s1-msg','Saloon name is required.');return;}
+        if(!document.getElementById('m-phone').value.trim()){showMsg('s1-msg','Phone number is required.');return;}
+    }
+    if(n===2)setTimeout(()=>{if(_map)_map.invalidateSize();},200);
+    if(n===4)buildReviewSummary();
+    document.getElementById('step-'+_currentStep).classList.remove('active');
+    document.getElementById('step-'+n).classList.add('active');
+    for(let i=1;i<=4;i++){const d=document.getElementById('dot-'+i);d.classList.remove('active','done');if(i<n)d.classList.add('done');else if(i===n)d.classList.add('active');}
+    _currentStep=n;
+    document.querySelector('.flex-1.overflow-y-auto')?.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Services builder ───────────────────────────────────────────
+
+function addServiceCategory(){
+    _catCount++;
+    const id='scat-'+_catCount;
+    document.getElementById('svc-placeholder')?.remove();
+    const div=document.createElement('div');div.id=id;div.className='border border-gray-200 rounded-xl overflow-hidden';
+    div.innerHTML=`
+    <div class="bg-gray-50 px-3 py-2.5 flex items-center gap-2 border-b border-gray-200">
+        <input type="text" placeholder="Category * (e.g. Haircuts, Beard, Braids)" id="${id}-name"
+               class="flex-1 bg-transparent text-sm font-bold text-gray-800 outline-none placeholder-red-300" style="min-width:0">
+        <button onclick="document.getElementById('${id}').remove()" class="text-gray-300 hover:text-red-400 text-sm"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="${id}-items" class="divide-y divide-gray-100"></div>
+    <button onclick="addServiceItem('${id}')" class="w-full py-2.5 text-xs text-gray-400 hover:text-violet-600 font-bold flex items-center justify-center gap-1 transition">
+        <i class="fas fa-plus text-[10px]"></i> Add Service
+    </button>`;
+    document.getElementById('services-builder').appendChild(div);
+    document.getElementById(id+'-name').focus();
+    addServiceItem(id);
+}
+
+function addServiceItem(catId){
+    _itemCount++;
+    const id=`${catId}-item-${_itemCount}`;
+    const div=document.createElement('div');div.id=id;div.className='p-3';
+    div.innerHTML=`
+    <div class="flex gap-2 items-start">
+        <div class="flex-1 space-y-1.5">
+            <input type="text" placeholder="Service name * (e.g. Fade Haircut)" id="${id}-name"
+                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-violet-400">
+            <input type="text" placeholder="Description (optional)" id="${id}-desc"
+                   class="w-full border border-gray-100 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none">
+            <div class="flex gap-2">
+                <div class="flex-1">
+                    <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Price (RWF) *</p>
+                    <input type="number" placeholder="3000" id="${id}-price"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-violet-400">
+                </div>
+                <div class="flex-1">
+                    <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Duration (min)</p>
+                    <input type="number" placeholder="30" id="${id}-duration"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-violet-400">
+                </div>
+            </div>
+        </div>
+        <button onclick="document.getElementById('${id}').remove()" class="text-gray-200 hover:text-red-400 text-sm pt-1 shrink-0"><i class="fas fa-times"></i></button>
+    </div>`;
+    document.getElementById(catId+'-items').appendChild(div);
+}
+
+// ── Staff builder ──────────────────────────────────────────────
+
+function addStaff(){
+    _staffCount++;
+    const id='staff-'+_staffCount;
+    document.getElementById('staff-placeholder')?.remove();
+    const div=document.createElement('div');div.id=id;div.className='border border-gray-200 rounded-xl p-3';
+    div.innerHTML=`
+    <div class="flex gap-2 items-start">
+        <div class="flex-1 space-y-1.5">
+            <input type="text" placeholder="Name * (e.g. Jean Paul)" id="${id}-name"
+                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-violet-400">
+            <input type="text" placeholder="Role / Specialty (e.g. Senior Barber, Braids Expert)" id="${id}-role"
+                   class="w-full border border-gray-100 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none">
+            <input type="url" placeholder="Photo URL (optional)" id="${id}-photo"
+                   class="w-full border border-gray-100 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none">
+        </div>
+        <button onclick="document.getElementById('${id}').remove()" class="text-gray-200 hover:text-red-400 text-sm pt-1 shrink-0"><i class="fas fa-times"></i></button>
+    </div>`;
+    document.getElementById('staff-builder').appendChild(div);
+}
+
+// ── Collect data ───────────────────────────────────────────────
+
+function collectServices(){
+    const cats=[];
+    document.querySelectorAll('#services-builder>[id^="scat-"]').forEach(catEl=>{
+        const catName=document.getElementById(catEl.id+'-name')?.value.trim()||'Services';
+        const items=[];
+        catEl.querySelectorAll(`[id^="${catEl.id}-item-"]`).forEach(itemEl=>{
+            const name=document.getElementById(itemEl.id+'-name')?.value.trim();
+            if(!name)return;
+            items.push({
+                name,
+                description:document.getElementById(itemEl.id+'-desc')?.value.trim()||null,
+                price:parseInt(document.getElementById(itemEl.id+'-price')?.value)||0,
+                duration:parseInt(document.getElementById(itemEl.id+'-duration')?.value)||null
+            });
+        });
+        if(items.length)cats.push({name:catName,items});
+    });
+    return cats;
+}
+
+function collectStaff(){
+    const staff=[];
+    document.querySelectorAll('#staff-builder>[id^="staff-"]').forEach(el=>{
+        const name=document.getElementById(el.id+'-name')?.value.trim();
+        if(!name)return;
+        staff.push({name,role:document.getElementById(el.id+'-role')?.value.trim()||null,photo_url:document.getElementById(el.id+'-photo')?.value.trim()||null});
+    });
+    return staff;
+}
+
+function buildReviewSummary(){
+    const services=collectServices();
+    const staff=collectStaff();
+    const tags=[...document.querySelectorAll('.tag-pill input:checked')].map(i=>i.value);
+    document.getElementById('review-summary').innerHTML=`
+    <div class="bg-gray-50 rounded-xl p-4 space-y-1.5 text-xs text-gray-600">
+        <p><span class="font-bold text-gray-900">Name:</span> ${document.getElementById('m-name').value}</p>
+        <p><span class="font-bold text-gray-900">Category:</span> ${document.getElementById('m-category').value}</p>
+        <p><span class="font-bold text-gray-900">Phone:</span> ${document.getElementById('m-phone').value}</p>
+        <p><span class="font-bold text-gray-900">Hours:</span> ${document.getElementById('m-hours').value||'—'}</p>
+        <p><span class="font-bold text-gray-900">Booking:</span> ${document.getElementById('m-booking').value}</p>
+        <p><span class="font-bold text-gray-900">Address:</span> ${document.getElementById('m-address').value||'—'}</p>
+        ${tags.length?`<p><span class="font-bold text-gray-900">Tags:</span> ${tags.join(', ')}</p>`:''}
+    </div>
+    <div class="bg-violet-50 border border-violet-100 rounded-xl p-4">
+        <p class="text-xs font-black text-violet-700 mb-2">✂️ Services — ${services.reduce((a,c)=>a+c.items.length,0)} items in ${services.length} categories</p>
+        ${services.map(c=>`<p class="text-xs font-bold text-gray-700 mt-2">${c.name}</p>${c.items.map(i=>`<p class="text-xs text-gray-500 pl-3">• ${i.name} — <b>${i.price.toLocaleString()} RWF</b>${i.duration?` · ${i.duration}min`:''}</p>`).join('')}`).join('')||'<p class="text-xs text-gray-400 italic">No services added</p>'}
+    </div>
+    ${staff.length?`<div class="bg-gray-50 rounded-xl p-4"><p class="text-xs font-black text-gray-700 mb-2">👤 Staff — ${staff.length} members</p>${staff.map(s=>`<p class="text-xs text-gray-500">• ${s.name}${s.role?` — ${s.role}`:''}</p>`).join('')}</div>`:''}`;
+}
+
+// ── Submit ─────────────────────────────────────────────────────
+
+async function submitApplication(){
+    const btn=document.getElementById('m-submit');btn.textContent='Submitting...';btn.disabled=true;
+    const services=collectServices();
+    const staff=collectStaff();
+    const tags=[...document.querySelectorAll('.tag-pill input:checked')].map(i=>i.value);
+    const payload={
+        name:document.getElementById('m-name').value.trim(),
+        description:document.getElementById('m-desc').value.trim(),
+        category:document.getElementById('m-category').value,
+        phone:document.getElementById('m-phone').value.trim(),
+        hours:document.getElementById('m-hours').value.trim(),
+        address:document.getElementById('m-address').value.trim(),
+        lat:parseFloat(document.getElementById('m-lat').value)||null,
+        lng:parseFloat(document.getElementById('m-lng').value)||null,
+        cover_image_url:document.getElementById('m-cover').value.trim()||null,
+        youtube_url:document.getElementById('m-youtube').value.trim()||null,
+        tags,
+        menu_data:services,
+        staff_data:staff
+    };
+    console.log('payload :', payload)
+    const {supabase}=await import('/js/supabase.js');
+    const {error}=await supabase.from('saloon_applications').insert(payload);
+    if(error){alert('Error: '+error.message);btn.textContent='Submit Application';btn.disabled=false;return;}
+    document.querySelector('.flex-1.overflow-y-auto').classList.add('hidden');
+    document.getElementById('m-success').classList.remove('hidden');
+}
+</script>
+</body>
+</html>

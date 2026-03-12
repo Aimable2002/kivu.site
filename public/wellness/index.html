@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Wellness & Massage — Kivu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .no-scrollbar::-webkit-scrollbar{display:none} .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full bg-white shadow-2xl flex flex-col relative">
+
+    <!-- Header -->
+    <div style="background:#0D9488" class="text-white pt-10 pb-4 px-4 shrink-0">
+        <div class="flex items-center justify-between mb-3">
+            <button onclick="window.location.href='/'" class="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </button>
+            <div>
+                <h1 class="font-black text-xl leading-none">🌿 Wellness</h1>
+                <p class="text-[11px] text-white/70 mt-0.5">Massage, Therapy & Body Care in Kigali</p>
+            </div>
+            <button onclick="window._openMap()" class="bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <i class="fas fa-map-marker-alt"></i> Map
+            </button>
+        </div>
+        <div class="relative">
+            <i class="fas fa-search absolute left-3 top-3 text-white/60 text-sm"></i>
+            <input id="search-input" type="text" placeholder="Search wellness centers..."
+                   class="w-full bg-white/20 text-white placeholder-white/60 rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none">
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex gap-2 px-4 py-3 overflow-x-auto no-scrollbar shrink-0 border-b border-gray-100">
+        <button onclick="window._clearFilters()" class="shrink-0 text-white px-4 py-1.5 rounded-full text-xs font-bold" style="background:#0D9488">All</button>
+        <button onclick="window._toggleOpen(this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">🟢 Open Now</button>
+        <button onclick="window._toggleRating(this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">⭐ Top Rated</button>
+        <button onclick="window._toggleTag('women', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">👩 Women</button>
+        <button onclick="window._toggleTag('couples', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">💑 Couples</button>
+        <button onclick="window._toggleTag('homevisit', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">🏠 Home Visit</button>
+        <button onclick="window._toggleTag('steam', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">♨️ Steam</button>
+    </div>
+
+    <!-- Feed -->
+    <div class="flex-1 overflow-y-auto no-scrollbar px-4 pt-4 pb-24">
+        <div id="wellness-feed" class="space-y-4"></div>
+        <div id="pagination"></div>
+    </div>
+
+    <!-- FAB -->
+    <a href="/wellness/merchant"
+       class="absolute right-4 text-white rounded-full flex items-center gap-2 px-5 h-14 shadow-xl active:scale-95 transition z-20"
+       style="bottom: max(2.5rem, env(safe-area-inset-bottom)); background:#0D9488">
+        <i class="fas fa-spa text-base"></i>
+        <span class="text-sm font-bold">List My Center</span>
+    </a>
+</div>
+
+<!-- Map overlay -->
+<div id="map-overlay" class="hidden absolute inset-0 z-[100] flex flex-col" style="position:fixed">
+    <div class="bg-white w-full h-[95%] mt-auto rounded-t-3xl flex flex-col overflow-hidden shadow-2xl">
+        <div class="flex justify-between items-center px-4 pt-4 pb-2 shrink-0">
+            <div>
+                <h3 class="font-bold text-gray-900">Wellness Map</h3>
+                <p id="map-count" class="text-[10px] text-gray-400 mt-0.5">Loading...</p>
+            </div>
+            <button onclick="window._closeMap()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-times text-gray-600 text-sm"></i>
+            </button>
+        </div>
+        <div id="leaflet-map" class="flex-1"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { renderFeed, openCenter } from '/js/wellness/feed.js';
+    import { supabase } from '/js/supabase.js';
+
+    let state = { open: false, rating: false, tags: [], search: '' };
+    renderFeed(1, {});
+
+    window._openCenter  = openCenter;
+    window._changePage  = (p) => renderFeed(p, state);
+
+    window._toggleOpen = (btn) => {
+        state.open = !state.open;
+        btn.classList.toggle('text-white', state.open);
+        btn.style.background = state.open ? '#0D9488' : '';
+        renderFeed(1, state);
+    };
+    window._toggleRating = (btn) => {
+        state.rating = !state.rating;
+        btn.classList.toggle('text-white', state.rating);
+        btn.style.background = state.rating ? '#0D9488' : '';
+        renderFeed(1, state);
+    };
+    window._toggleTag = (tag, btn) => {
+        const idx = state.tags.indexOf(tag);
+        if (idx === -1) { state.tags.push(tag); btn.style.background = '#0D9488'; btn.classList.add('text-white'); }
+        else { state.tags.splice(idx,1); btn.style.background = ''; btn.classList.remove('text-white'); }
+        renderFeed(1, state);
+    };
+    window._clearFilters = () => { state = {open:false,rating:false,tags:[],search:''}; document.getElementById('search-input').value=''; renderFeed(1,{}); };
+
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        clearTimeout(window._sd);
+        window._sd = setTimeout(() => { state.search = e.target.value.trim(); renderFeed(1, state); }, 350);
+    });
+
+    window._openMap  = () => { document.getElementById('map-overlay').classList.remove('hidden'); initMap(); };
+    window._closeMap = () => document.getElementById('map-overlay').classList.add('hidden');
+
+    let _mapInit = false;
+    async function initMap() {
+        if (_mapInit) return; _mapInit = true;
+        const link = document.createElement('link'); link.rel='stylesheet'; link.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(link);
+        const script = document.createElement('script'); script.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.onload = async () => {
+            const map = L.map('leaflet-map').setView([-1.9441,30.0619],13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(map);
+            const { data } = await supabase.from('wellness_with_rating').select('id,name,category,lat,lng,is_open').not('lat','is',null);
+            (data||[]).forEach(w => {
+                if (!w.lat||!w.lng) return;
+                L.marker([w.lat,w.lng]).addTo(map).bindPopup(`<b>${w.name}</b><br>${w.category}<br><a href="#" onclick="sessionStorage.setItem('kf_wellness_id','${w.id}');window.location.href='/wellness/detail'" style="color:#0D9488;font-weight:bold">View →</a>`);
+            });
+            document.getElementById('map-count').textContent = `${(data||[]).length} centers on map`;
+        };
+        document.head.appendChild(script);
+    }
+</script>
+</body>
+</html>

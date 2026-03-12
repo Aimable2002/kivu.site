@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Kivu Super App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+        .fade-up { animation: fadeUp 0.4s ease both }
+        .no-scrollbar::-webkit-scrollbar { display:none }
+        .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full bg-white shadow-2xl flex flex-col overflow-y-auto no-scrollbar">
+
+    <!-- Hero header -->
+    <div class="relative px-5 pt-14 pb-8 shrink-0" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)">
+        <div class="mb-1">
+            <span class="text-[10px] font-black tracking-[4px] text-white/40 uppercase">Kigali</span>
+        </div>
+        <h1 class="text-3xl font-black text-white leading-tight mb-1">Kivu <span style="color:#FF7F50">Super</span> App</h1>
+        <p class="text-sm text-white/50">Everything you need, one place.</p>
+
+        <!-- Search bar -->
+        <div class="mt-5 relative">
+            <i class="fas fa-search absolute left-4 top-3.5 text-gray-400 text-sm"></i>
+            <input type="text" placeholder="What are you looking for?"
+                   class="w-full bg-white rounded-2xl pl-10 pr-4 py-3 text-sm text-gray-700 outline-none shadow-lg">
+        </div>
+    </div>
+
+    <!-- Modules grid -->
+    <div class="px-4 pt-6 pb-4 shrink-0">
+        <p class="text-[11px] font-black tracking-widest text-gray-400 uppercase mb-4">Explore Services</p>
+
+        <div class="grid grid-cols-2 gap-3">
+
+            <!-- Food -->
+            <a href="/food" class="fade-up rounded-3xl overflow-hidden shadow-sm active:scale-95 transition block" style="animation-delay:0.05s; background:linear-gradient(135deg,#FF7F50,#ff5722)">
+                <div class="p-5">
+                    <div class="text-3xl mb-3">🍽️</div>
+                    <h2 class="text-white font-black text-base leading-tight">Food</h2>
+                    <p class="text-white/70 text-[11px] mt-0.5">Restaurants & Delivery</p>
+                </div>
+                <div class="px-5 pb-4 flex items-center justify-between">
+                    <span class="text-white/60 text-[10px]">Browse restaurants</span>
+                    <i class="fas fa-arrow-right text-white/60 text-xs"></i>
+                </div>
+            </a>
+
+            <!-- Saloon -->
+            <a href="/saloon" class="fade-up rounded-3xl overflow-hidden shadow-sm active:scale-95 transition block" style="animation-delay:0.1s; background:linear-gradient(135deg,#7C3AED,#5b21b6)">
+                <div class="p-5">
+                    <div class="text-3xl mb-3">✂️</div>
+                    <h2 class="text-white font-black text-base leading-tight">Saloon</h2>
+                    <p class="text-white/70 text-[11px] mt-0.5">Barbershops & Hair</p>
+                </div>
+                <div class="px-5 pb-4 flex items-center justify-between">
+                    <span class="text-white/60 text-[10px]">Book a session</span>
+                    <i class="fas fa-arrow-right text-white/60 text-xs"></i>
+                </div>
+            </a>
+
+            <!-- Wellness -->
+            <a href="/wellness" class="fade-up rounded-3xl overflow-hidden shadow-sm active:scale-95 transition block" style="animation-delay:0.15s; background:linear-gradient(135deg,#0D9488,#065f46)">
+                <div class="p-5">
+                    <div class="text-3xl mb-3">🌿</div>
+                    <h2 class="text-white font-black text-base leading-tight">Wellness</h2>
+                    <p class="text-white/70 text-[11px] mt-0.5">Massage & Therapy</p>
+                </div>
+                <div class="px-5 pb-4 flex items-center justify-between">
+                    <span class="text-white/60 text-[10px]">Relax & recover</span>
+                    <i class="fas fa-arrow-right text-white/60 text-xs"></i>
+                </div>
+            </a>
+
+            <!-- Academy -->
+            <a href="/academy" class="fade-up rounded-3xl overflow-hidden shadow-sm active:scale-95 transition block" style="animation-delay:0.2s; background:linear-gradient(135deg,#2563EB,#1e3a8a)">
+                <div class="p-5">
+                    <div class="text-3xl mb-3">📚</div>
+                    <h2 class="text-white font-black text-base leading-tight">Academy</h2>
+                    <p class="text-white/70 text-[11px] mt-0.5">Books & Dictionary</p>
+                </div>
+                <div class="px-5 pb-4 flex items-center justify-between">
+                    <span class="text-white/60 text-[10px]">Learn & explore</span>
+                    <i class="fas fa-arrow-right text-white/60 text-xs"></i>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- List your business -->
+    <div class="px-4 pt-2 pb-4 shrink-0">
+        <p class="text-[11px] font-black tracking-widest text-gray-400 uppercase mb-3">Own a Business?</p>
+        <div class="grid grid-cols-3 gap-2">
+            <a href="/food/merchant"    class="bg-gray-50 border border-gray-100 rounded-2xl p-3 text-center active:scale-95 transition block">
+                <div class="text-xl mb-1">🍽️</div>
+                <p class="text-[10px] font-bold text-gray-600">List Restaurant</p>
+            </a>
+            <a href="/saloon/merchant"  class="bg-gray-50 border border-gray-100 rounded-2xl p-3 text-center active:scale-95 transition block">
+                <div class="text-xl mb-1">✂️</div>
+                <p class="text-[10px] font-bold text-gray-600">List Saloon</p>
+            </a>
+            <a href="/wellness/merchant" class="bg-gray-50 border border-gray-100 rounded-2xl p-3 text-center active:scale-95 transition block">
+                <div class="text-xl mb-1">🌿</div>
+                <p class="text-[10px] font-bold text-gray-600">List Center</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Admin access -->
+    <div class="px-4 pt-2 pb-10 shrink-0">
+        <p class="text-[11px] font-black tracking-widest text-gray-400 uppercase mb-3">Admin Access</p>
+        <div class="grid grid-cols-3 gap-2">
+            <a href="/food/admin"    class="bg-gray-900 rounded-2xl p-3 text-center active:scale-95 transition block">
+                <i class="fas fa-utensils text-white text-sm mb-1 block"></i>
+                <p class="text-[10px] font-bold text-gray-400">Food</p>
+            </a>
+            <a href="/saloon/admin"  class="bg-gray-900 rounded-2xl p-3 text-center active:scale-95 transition block">
+                <i class="fas fa-scissors text-white text-sm mb-1 block"></i>
+                <p class="text-[10px] font-bold text-gray-400">Saloon</p>
+            </a>
+            <a href="/wellness/admin" class="bg-gray-900 rounded-2xl p-3 text-center active:scale-95 transition block">
+                <i class="fas fa-spa text-white text-sm mb-1 block"></i>
+                <p class="text-[10px] font-bold text-gray-400">Wellness</p>
+            </a>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
