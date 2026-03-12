@@ -2,6 +2,16 @@ import { supabase } from '../supabase.js';
 
 const DEFAULT_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e5e7eb'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%239ca3af'/%3E%3Cellipse cx='50' cy='82' rx='28' ry='20' fill='%239ca3af'/%3E%3C/svg%3E`;
 
+function normalizePhone(raw) {
+    if (!raw) return '';
+    let digits = raw.replace(/\D/g, '');
+    if (digits.startsWith('250') && digits.length === 12) return digits;
+    if (digits.startsWith('1')   && digits.length === 11) return digits;
+    if (digits.startsWith('0')   && digits.length === 10) return '250' + digits.slice(1);
+    if (digits.length === 9) return '250' + digits;
+    return digits;
+}
+
 export async function loadSaloon() {
     const sessionId = sessionStorage.getItem('kf_saloon_id');
     const urlId     = new URLSearchParams(window.location.search).get('id');
@@ -36,19 +46,18 @@ export async function loadSaloon() {
     }
 
     const waBtn = document.getElementById('whatsapp-book-btn');
-    if (waBtn && s.phone) waBtn.dataset.phone = s.phone.replace(/\D/g, '');
+    if (waBtn && s.phone) waBtn.dataset.phone = normalizePhone(s.phone);
 
     const playBtn = document.getElementById('youtube-play-btn');
     if (!s.youtube_url) playBtn?.classList.add('hidden');
     else { playBtn?.classList.remove('hidden'); playBtn.onclick = () => loadYoutube(s.youtube_url); }
 
-    // Populate info tab
     const infoEl = document.getElementById('view-info');
     if (infoEl) {
-        const hours = Object.values(s.hours || {})[0];
-        const bookingMap  = { walkin: '🚶 Walk-ins Welcome', appointment: '📅 Appointment Only', both: '🚶 Walk-ins + 📅 Appointments' };
+        const hours        = s.hours?.display || (typeof s.hours === 'string' ? s.hours : null) || Object.values(s.hours || {})[0] || null;
+        const bookingMap   = { walkin: '🚶 Walk-ins Welcome', appointment: '📅 Appointment Only', both: '🚶 Walk-ins + 📅 Appointments' };
         const bookingLabel = bookingMap[s.booking_type] || '';
-        const tags = (s.tags || []).join(' · ');
+        const tags         = (s.tags || []).join(' · ');
         infoEl.innerHTML = `
         <div class="space-y-3">
             ${s.address ? `
@@ -206,11 +215,12 @@ export async function submitReview(saloonId) {
 }
 
 export function bookViaWhatsApp(saloonName, phone, serviceName, price) {
+    const normalized  = normalizePhone(phone);
     const serviceText = serviceName && price > 0
         ? `\n\nService: *${serviceName}*\nPrice: ${price.toLocaleString()} RWF`
         : '';
     const msg = encodeURIComponent(`Hi! I'd like to book an appointment at *${saloonName}*.${serviceText}\n\nPlease confirm my appointment. Thank you!`);
-    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+    window.open(`https://wa.me/${normalized}?text=${msg}`, '_blank');
 }
 
 function loadYoutube(url) {

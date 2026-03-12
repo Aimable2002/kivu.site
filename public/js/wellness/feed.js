@@ -19,6 +19,7 @@ export async function fetchCenters(page = 1, filters = {}) {
     if (filters.open)         query = query.eq('is_open', true);
     if (filters.rating)       query = query.order('avg_rating', { ascending: false });
     if (filters.tags?.length) query = query.contains('tags', filters.tags);
+    if (filters.search)       query = query.or(`name.ilike.%${filters.search}%,address.ilike.%${filters.search}%,category.ilike.%${filters.search}%`);
     const { data, error } = await query;
     if (error) { console.error(error.message); return []; }
     return data;
@@ -42,7 +43,6 @@ export async function renderFeed(page = 1, filters = {}) {
 }
 
 function buildCard(w) {
-    console.log('w :', w)
     const vipBorder  = w.is_vip ? 'border-2 border-yellow-400 shadow-md' : 'border border-gray-100 shadow-sm';
     const vipBadge   = w.is_vip ? `<div class="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-[9px] font-black uppercase px-2 py-1 rounded shadow-md">⭐ Promoted</div>` : '';
     const statusBadge = w.is_open

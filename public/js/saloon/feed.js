@@ -19,6 +19,7 @@ export async function fetchSaloons(page = 1, filters = {}) {
     if (filters.open)         query = query.eq('is_open', true);
     if (filters.rating)       query = query.order('avg_rating', { ascending: false });
     if (filters.tags?.length) query = query.contains('tags', filters.tags);
+    if (filters.search)       query = query.or(`name.ilike.%${filters.search}%,address.ilike.%${filters.search}%,category.ilike.%${filters.search}%`);
     const { data, error } = await query;
     if (error) { console.error(error.message); return []; }
     return data;
@@ -49,7 +50,7 @@ function buildCard(s) {
         : `<span class="flex items-center gap-1 text-[10px] font-bold text-red-400"><span class="w-1.5 h-1.5 rounded-full bg-red-400 inline-block"></span>Closed</span>`;
     const stars       = buildStars(s.avg_rating);
     const tags        = (s.tags || []).slice(0,3).map(t => TAG_MAP[t] ? `<span class="bg-gray-100 text-gray-500 text-[9px] px-2 py-0.5 rounded">${TAG_MAP[t]}</span>` : '').join('');
-    const hours       = s.hours?.display || null;
+    const hours = Object.values(s.hours || {})[0];
     const bookingMap  = { walkin: '🚶 Walk-ins', appointment: '📅 Appt Only', both: '🚶 + 📅' };
     const bookingBadge = s.booking_type ? `<span class="bg-violet-50 text-violet-600 text-[9px] font-bold px-2 py-0.5 rounded">${bookingMap[s.booking_type] || ''}</span>` : '';
     return `

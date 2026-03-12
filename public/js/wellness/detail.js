@@ -1,5 +1,15 @@
 import { supabase } from '../supabase.js';
 
+function normalizePhone(raw) {
+    if (!raw) return '';
+    let digits = raw.replace(/\D/g, '');
+    if (digits.startsWith('250') && digits.length === 12) return digits;
+    if (digits.startsWith('1')   && digits.length === 11) return digits;
+    if (digits.startsWith('0')   && digits.length === 10) return '250' + digits.slice(1);
+    if (digits.length === 9) return '250' + digits;
+    return digits;
+}
+
 export async function loadCenter() {
     const sessionId = sessionStorage.getItem('kf_wellness_id');
     const urlId     = new URLSearchParams(window.location.search).get('id');
@@ -34,19 +44,18 @@ export async function loadCenter() {
     }
 
     const waBtn = document.getElementById('whatsapp-book-btn');
-    if (waBtn && w.phone) waBtn.dataset.phone = w.phone.replace(/\D/g, '');
+    if (waBtn && w.phone) waBtn.dataset.phone = normalizePhone(w.phone);
 
     const playBtn = document.getElementById('youtube-play-btn');
     if (!w.youtube_url) playBtn?.classList.add('hidden');
     else { playBtn?.classList.remove('hidden'); playBtn.onclick = () => loadYoutube(w.youtube_url); }
 
-    // Populate info tab
     const infoEl = document.getElementById('view-info');
     if (infoEl) {
-        const hours = Object.values(w.hours || {})[0];
-        const bookingMap  = { walkin: '🚶 Walk-ins Welcome', appointment: '📅 Appointment Only', both: '🚶 Walk-ins + 📅 Appointments' };
+        const hours        = w.hours?.display || (typeof w.hours === 'string' ? w.hours : null) || Object.values(w.hours || {})[0] || null;
+        const bookingMap   = { walkin: '🚶 Walk-ins Welcome', appointment: '📅 Appointment Only', both: '🚶 Walk-ins + 📅 Appointments' };
         const bookingLabel = bookingMap[w.booking_type] || '';
-        const tags = (w.tags || []).join(' · ');
+        const tags         = (w.tags || []).join(' · ');
         infoEl.innerHTML = `
         <div class="space-y-3">
             ${w.address ? `
@@ -185,11 +194,12 @@ export async function submitReview(centerId) {
 }
 
 export function bookViaWhatsApp(centerName, phone, serviceName, price) {
+    const normalized  = normalizePhone(phone);
     const serviceText = serviceName && price > 0
         ? `\n\nTreatment: *${serviceName}*\nPrice: ${price.toLocaleString()} RWF`
         : '';
     const msg = encodeURIComponent(`Hi! I'd like to book a session at *${centerName}*.${serviceText}\n\nPlease confirm my appointment. Thank you!`);
-    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+    window.open(`https://wa.me/${normalized}?text=${msg}`, '_blank');
 }
 
 function loadYoutube(url) {

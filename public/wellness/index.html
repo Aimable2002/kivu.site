@@ -16,9 +16,6 @@
     <!-- Header -->
     <div style="background:#0D9488" class="text-white pt-10 pb-4 px-4 shrink-0">
         <div class="flex items-center justify-between mb-3">
-            <button onclick="window.location.href='/'" class="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
-                <i class="fas fa-arrow-left text-sm"></i>
-            </button>
             <div>
                 <h1 class="font-black text-xl leading-none">🌿 Wellness</h1>
                 <p class="text-[11px] text-white/70 mt-0.5">Massage, Therapy & Body Care in Kigali</p>
@@ -54,7 +51,7 @@
     <!-- FAB -->
     <a href="/wellness/merchant"
        class="absolute right-4 text-white rounded-full flex items-center gap-2 px-5 h-14 shadow-xl active:scale-95 transition z-20"
-       style="bottom: max(2.5rem, env(safe-area-inset-bottom)); background:#0D9488">
+       style="bottom: max(3.5rem, env(safe-area-inset-bottom)); background:#0D9488">
         <i class="fas fa-spa text-base"></i>
         <span class="text-sm font-bold">List My Center</span>
     </a>
@@ -65,12 +62,20 @@
     <div class="bg-white w-full h-[95%] mt-auto rounded-t-3xl flex flex-col overflow-hidden shadow-2xl">
         <div class="flex justify-between items-center px-4 pt-4 pb-2 shrink-0">
             <div>
-                <h3 class="font-bold text-gray-900">Wellness Map</h3>
+                <h3 id="map-title" class="font-bold text-gray-900 text-base">Wellness Map</h3>
                 <p id="map-count" class="text-[10px] text-gray-400 mt-0.5">Loading...</p>
             </div>
             <button onclick="window._closeMap()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                 <i class="fas fa-times text-gray-600 text-sm"></i>
             </button>
+        </div>
+        <div class="px-4 pb-3 shrink-0">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                <input id="map-search" type="text" placeholder="Search center or location..."
+                       class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-8 pr-4 py-2 text-sm outline-none"
+                       oninput="window._mapSearch(this.value)">
+            </div>
         </div>
         <div id="leaflet-map" class="flex-1"></div>
     </div>
@@ -78,13 +83,16 @@
 
 <script type="module">
     import { renderFeed, openCenter } from '/js/wellness/feed.js';
-    import { supabase } from '/js/supabase.js';
+    import { openMap, closeMap, mapSearch } from '/js/wellness/map.js';
 
     let state = { open: false, rating: false, tags: [], search: '' };
     renderFeed(1, {});
 
-    window._openCenter  = openCenter;
-    window._changePage  = (p) => renderFeed(p, state);
+    window._openCenter   = openCenter;
+    window._changePage   = (p) => renderFeed(p, state);
+    window._openMap      = openMap;
+    window._closeMap     = closeMap;
+    window._mapSearch    = (q) => mapSearch(q);
 
     window._toggleOpen = (btn) => {
         state.open = !state.open;
@@ -104,33 +112,19 @@
         else { state.tags.splice(idx,1); btn.style.background = ''; btn.classList.remove('text-white'); }
         renderFeed(1, state);
     };
-    window._clearFilters = () => { state = {open:false,rating:false,tags:[],search:''}; document.getElementById('search-input').value=''; renderFeed(1,{}); };
+    window._clearFilters = () => {
+        state = { open:false, rating:false, tags:[], search:'' };
+        document.getElementById('search-input').value = '';
+        renderFeed(1, {});
+    };
 
     document.getElementById('search-input').addEventListener('input', (e) => {
         clearTimeout(window._sd);
-        window._sd = setTimeout(() => { state.search = e.target.value.trim(); renderFeed(1, state); }, 350);
+        window._sd = setTimeout(() => {
+            state.search = e.target.value.trim();
+            renderFeed(1, state);
+        }, 350);
     });
-
-    window._openMap  = () => { document.getElementById('map-overlay').classList.remove('hidden'); initMap(); };
-    window._closeMap = () => document.getElementById('map-overlay').classList.add('hidden');
-
-    let _mapInit = false;
-    async function initMap() {
-        if (_mapInit) return; _mapInit = true;
-        const link = document.createElement('link'); link.rel='stylesheet'; link.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(link);
-        const script = document.createElement('script'); script.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        script.onload = async () => {
-            const map = L.map('leaflet-map').setView([-1.9441,30.0619],13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(map);
-            const { data } = await supabase.from('wellness_with_rating').select('id,name,category,lat,lng,is_open').not('lat','is',null);
-            (data||[]).forEach(w => {
-                if (!w.lat||!w.lng) return;
-                L.marker([w.lat,w.lng]).addTo(map).bindPopup(`<b>${w.name}</b><br>${w.category}<br><a href="#" onclick="sessionStorage.setItem('kf_wellness_id','${w.id}');window.location.href='/wellness/detail'" style="color:#0D9488;font-weight:bold">View →</a>`);
-            });
-            document.getElementById('map-count').textContent = `${(data||[]).length} centers on map`;
-        };
-        document.head.appendChild(script);
-    }
 </script>
 </body>
 </html>
