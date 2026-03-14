@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Funeral Service — Kivu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .no-scrollbar::-webkit-scrollbar{display:none} .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}} .fade-in{animation:fadeIn .2s ease}
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full relative shadow-2xl overflow-hidden bg-white flex flex-col">
+
+    <!-- Sticky header -->
+    <div class="shrink-0 flex items-center gap-3 px-4 pt-10 pb-3 bg-white border-b border-gray-100 z-30 relative">
+        <button onclick="window._goBack()" class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center shrink-0 active:scale-95 transition">
+            <i class="fas fa-arrow-left text-gray-700 text-sm"></i>
+        </button>
+        <div class="flex-1 min-w-0">
+            <h1 id="provider-name" class="font-black text-gray-900 text-base leading-tight truncate"></h1>
+            <p id="provider-category" class="text-[10px] text-gray-400"></p>
+        </div>
+        <div id="provider-status" class="text-[10px] font-bold px-2 py-1 rounded shrink-0"></div>
+    </div>
+
+    <!-- Hero -->
+    <div class="h-48 relative bg-gray-900 shrink-0">
+        <img id="provider-cover" class="w-full h-full object-cover opacity-90">
+        <div id="hero-gradient" class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+        <button id="youtube-play-btn" class="hidden absolute inset-0 m-auto w-14 h-14 bg-black/40 backdrop-blur-sm text-white border-2 border-white/80 rounded-full flex items-center justify-center z-10 active:scale-95 transition">
+            <i class="fas fa-play text-lg ml-1"></i>
+        </button>
+        <div id="youtube-frame" class="hidden absolute inset-0 z-20"></div>
+    </div>
+
+    <!-- Info bar -->
+    <div class="px-4 pt-3 pb-3 shrink-0 bg-white border-b border-gray-100">
+        <p id="provider-address" class="text-xs text-gray-500 mb-2"></p>
+        <div class="flex gap-3 items-center">
+            <span class="text-amber-400 text-sm font-bold flex items-center gap-1">
+                <i class="fas fa-star"></i><span id="rating-avg">–</span>
+            </span>
+            <span id="rating-count" class="text-xs text-gray-400"></span>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-100 shrink-0">
+        <button onclick="switchTab('services')" id="tab-services" class="flex-1 py-2.5 text-xs font-bold border-b-2" style="border-color:#374151;color:#374151">Services</button>
+        <button onclick="switchTab('reviews')"  id="tab-reviews"  class="flex-1 py-2.5 text-xs font-bold border-b-2 border-transparent text-gray-400">Reviews</button>
+        <button onclick="switchTab('info')"     id="tab-info"     class="flex-1 py-2.5 text-xs font-bold border-b-2 border-transparent text-gray-400">Info</button>
+    </div>
+
+    <!-- Tab content -->
+    <div class="flex-1 overflow-y-auto no-scrollbar px-4 pt-4 pb-28">
+        <div id="view-services" class="fade-in"></div>
+
+        <div id="view-reviews" class="hidden fade-in">
+            <div class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100">
+                <p class="text-xs font-bold text-gray-700 mb-2">Leave a Review</p>
+                <input id="review-name" type="text" placeholder="Your name"
+                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs mb-2 outline-none">
+                <div class="flex gap-1 mb-2" id="star-picker">
+                    <i class="fas fa-star text-gray-300 text-lg cursor-pointer" onclick="window._setRating(1)"></i>
+                    <i class="fas fa-star text-gray-300 text-lg cursor-pointer" onclick="window._setRating(2)"></i>
+                    <i class="fas fa-star text-gray-300 text-lg cursor-pointer" onclick="window._setRating(3)"></i>
+                    <i class="fas fa-star text-gray-300 text-lg cursor-pointer" onclick="window._setRating(4)"></i>
+                    <i class="fas fa-star text-gray-300 text-lg cursor-pointer" onclick="window._setRating(5)"></i>
+                </div>
+                <textarea id="review-comment" rows="2" placeholder="Share your experience..."
+                          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs mb-2 outline-none resize-none"></textarea>
+                <button onclick="window._submitReview()" class="w-full text-white font-bold py-2 rounded-lg text-xs active:scale-95 transition" style="background:#374151">
+                    Submit Review
+                </button>
+            </div>
+            <div id="reviews-list"></div>
+        </div>
+
+        <div id="view-info" class="hidden fade-in"></div>
+    </div>
+
+    <!-- FAB: Contact via WhatsApp -->
+    <div class="absolute right-4 z-20" style="bottom: max(1.5rem, env(safe-area-inset-bottom))">
+        <button id="whatsapp-contact-btn" onclick="window._contactDefault()"
+                class="h-14 bg-green-500 text-white rounded-full flex items-center gap-2 px-5 shadow-xl active:scale-95 transition">
+            <i class="fab fa-whatsapp text-xl"></i>
+            <span class="text-sm font-bold">Contact via WhatsApp</span>
+        </button>
+    </div>
+</div>
+
+<script type="module">
+    import { loadProvider, goBack, renderServices, renderReviews, submitReview, contactViaWhatsApp } from '/js/funeral/detail.js';
+
+    (async () => {
+        const provider = await loadProvider();
+        if (!provider) return;
+
+        await renderServices(provider.id);
+
+        window._goBack        = goBack;
+        window._submitReview  = () => submitReview(provider.id);
+        window._currentRating = 0;
+        window._setRating     = (v) => {
+            window._currentRating = v;
+            document.querySelectorAll('#star-picker i').forEach((s, i) => {
+                s.style.color = i < v ? '#f59e0b' : '#d1d5db';
+            });
+        };
+
+        const phone = () => document.getElementById('whatsapp-contact-btn').dataset.phone || '';
+        window._contactDefault   = () => contactViaWhatsApp(provider.name, phone(), '', 0);
+        window._inquireService   = (name, price) => contactViaWhatsApp(provider.name, phone(), name, price);
+
+        window.switchTab = async (tab) => {
+            ['services', 'reviews', 'info'].forEach(t => {
+                document.getElementById('view-' + t).classList.toggle('hidden', t !== tab);
+                const btn = document.getElementById('tab-' + t);
+                btn.style.borderColor = t === tab ? '#374151' : 'transparent';
+                btn.style.color       = t === tab ? '#374151' : '#9ca3af';
+            });
+            if (tab === 'reviews' && !window._reviewsLoaded) {
+                await renderReviews(provider.id);
+                window._reviewsLoaded = true;
+            }
+        };
+    })();
+</script>
+</body>
+</html>

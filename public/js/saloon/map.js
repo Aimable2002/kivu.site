@@ -5,16 +5,6 @@ let _map       = null;
 let _markers   = [];
 let _allData   = [];
 
-function normalizePhone(raw) {
-    if (!raw) return '';
-    let digits = raw.replace(/\D/g, '');
-    if (digits.startsWith('250') && digits.length === 12) return digits;
-    if (digits.startsWith('1')   && digits.length === 11) return digits;
-    if (digits.startsWith('0')   && digits.length === 10) return '250' + digits.slice(1);
-    if (digits.length === 9) return '250' + digits;
-    return digits;
-}
-
 export function openMap() {
     const overlay = document.getElementById('map-overlay');
     if (overlay) overlay.classList.remove('hidden');
@@ -38,9 +28,6 @@ export function openMap() {
 
 export function closeMap() {
     document.getElementById('map-overlay')?.classList.add('hidden');
-    // Reset title when closing
-    const t = document.getElementById('map-title');
-    if (t) t.textContent = 'Saloons Map';
 }
 
 async function initMap() {
@@ -54,7 +41,7 @@ async function initMap() {
 
     const { data } = await supabase
         .from('saloons_with_rating')
-        .select('id, name, category, address, lat, lng, is_open, is_vip, avg_rating, tags, cover_image_url, booking_type, phone')
+        .select('id, name, category, address, lat, lng, is_open, is_vip, avg_rating, tags, cover_image_url')
         .not('lat', 'is', null)
         .not('lng', 'is', null);
 
@@ -117,15 +104,6 @@ function buildPopup(s) {
     const img = s.cover_image_url
         ? `<img src="${s.cover_image_url}" style="width:100%;height:70px;object-fit:cover;border-radius:8px 8px 0 0" onerror="this.style.display='none'">`
         : '';
-    const bookingMap = { walkin: '🚶 Walk-ins', appointment: '📅 Appt Only', both: '🚶+📅' };
-    const booking = s.booking_type ? `<span style="font-size:10px;color:#7C3AED;font-weight:600">${bookingMap[s.booking_type] || ''}</span>` : '';
-    const phone = s.phone ? normalizePhone(s.phone) : '';
-    const waBtn = phone
-        ? `<button onclick="window._mapWhatsApp('${phone}','${s.name.replace(/'/g,"\\'")}','')"
-                   style="width:100%;background:#25D366;color:white;border:none;border-radius:8px;padding:7px;font-weight:700;font-size:11px;cursor:pointer;margin-top:4px">
-               <i class="fab fa-whatsapp"></i> WhatsApp
-           </button>`
-        : '';
 
     return `
     <div style="font-family:system-ui,sans-serif;min-width:180px">
@@ -137,12 +115,10 @@ function buildPopup(s) {
                 <span style="font-size:11px;color:#f59e0b;font-weight:700">${stars}</span>
                 ${status}
             </div>
-            <div style="margin-bottom:6px">${booking}</div>
             <button onclick="window._mapOpenSaloon('${s.id}')"
                     style="width:100%;background:#7C3AED;color:white;border:none;border-radius:8px;padding:7px;font-weight:700;font-size:11px;cursor:pointer">
                 View Saloon →
             </button>
-            ${waBtn}
         </div>
     </div>`;
 }
@@ -156,11 +132,6 @@ window._mapOpenSaloon = function(id) {
     window.location.href = '/saloon/detail';
 };
 
-window._mapWhatsApp = function(phone, name, service) {
-    const msg = encodeURIComponent(`Hi! I'd like to book an appointment at *${name}*.\n\nPlease confirm my appointment. Thank you!`);
-    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-};
-
 export function mapSearch(query) {
     if (!_map) return;
     const q = query.trim().toLowerCase();
@@ -168,7 +139,7 @@ export function mapSearch(query) {
     if (!q) {
         _markers.forEach(({ marker }) => { marker.addTo(_map); marker.setOpacity(1); });
         const countEl = document.getElementById('map-count');
-        if (countEl) countEl.textContent = `${_allData.length} saloon${_allData.length !== 1 ? 's' : ''} on map`;
+        if (countEl) countEl.textContent = `${_allData.length} saloons on map`;
         return;
     }
 

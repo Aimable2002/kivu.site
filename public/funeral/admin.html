@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Funeral Admin — Kivu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}</style>
+</head>
+<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full bg-white shadow-2xl flex flex-col">
+
+    <!-- Login -->
+    <div id="login-screen" class="flex-1 flex flex-col items-center justify-center p-8">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 text-white text-2xl" style="background:#374151">🕊️</div>
+        <h1 class="font-black text-xl text-gray-900 mb-1">Funeral Admin</h1>
+        <p class="text-xs text-gray-400 mb-6">Enter password to continue</p>
+        <input id="pw-input" type="password" placeholder="Password"
+               class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-3 text-center"
+               onkeydown="if(event.key==='Enter') checkPassword()">
+        <div id="pw-msg" class="hidden text-red-500 text-xs font-bold mb-2"></div>
+        <button onclick="checkPassword()" class="w-full text-white font-bold py-3 rounded-xl text-sm" style="background:#374151">Enter</button>
+    </div>
+
+    <!-- Admin panel -->
+    <div id="admin-panel" class="hidden flex-1 flex flex-col overflow-hidden">
+
+        <div class="text-white pt-10 pb-4 px-4 shrink-0 flex items-center justify-between" style="background:#374151">
+            <div>
+                <h1 class="font-black text-lg leading-none">🕊️ Funeral Admin</h1>
+                <p class="text-[10px] text-white/70 mt-0.5">Manage providers & applications</p>
+            </div>
+            <a href="/" class="bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full">← Home</a>
+        </div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar px-4 pt-4 pb-8 space-y-6">
+
+            <!-- Pending Applications -->
+            <div>
+                <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase mb-3">Pending Applications</p>
+                <div id="applications-list">
+                    <p class="text-xs text-gray-400 italic text-center py-4">Loading...</p>
+                </div>
+            </div>
+
+            <!-- Live Providers -->
+            <div>
+                <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase mb-3">Live Providers</p>
+                <div id="providers-list">
+                    <p class="text-xs text-gray-400 italic text-center py-4">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const ADMIN_PASSWORD = 'kivu2024';
+
+function checkPassword() {
+    const val = document.getElementById('pw-input').value;
+    if (val === ADMIN_PASSWORD) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('admin-panel').classList.remove('hidden');
+        loadAll();
+    } else {
+        const msg = document.getElementById('pw-msg');
+        msg.textContent = 'Wrong password.';
+        msg.classList.remove('hidden');
+    }
+}
+
+async function loadAll() {
+    await Promise.all([loadApplications(), loadProviders()]);
+}
+
+async function loadApplications() {
+    const el = document.getElementById('applications-list');
+    const res = await fetch('/api/admin/funeral-applications');
+    const data = await res.json();
+    if (!data.length) { el.innerHTML = '<p class="text-xs text-gray-400 italic text-center py-4">No pending applications.</p>'; return; }
+    el.innerHTML = data.map(a => `
+    <div class="bg-gray-50 rounded-xl p-3 mb-3 border border-gray-100">
+        <div class="flex justify-between items-start mb-1">
+            <div>
+                <p class="font-bold text-sm text-gray-900">${a.name}</p>
+                <p class="text-[10px] text-gray-400">${a.category} · ${a.phone || '—'}</p>
+                <p class="text-[10px] text-gray-400">${a.address || '—'}</p>
+            </div>
+            <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-600">${a.status}</span>
+        </div>
+        ${a.description ? `<p class="text-xs text-gray-500 my-2">${a.description}</p>` : ''}
+        ${a.menu_data?.length ? `<p class="text-[10px] text-gray-400 mb-2">Services: ${a.menu_data.reduce((acc,c)=>acc+(c.items?.length||0),0)} items in ${a.menu_data.length} categories</p>` : ''}
+        <div class="flex gap-2 mt-2">
+            <button onclick="approveApp('${a.id}')" class="flex-1 bg-green-500 text-white text-xs font-bold py-2 rounded-lg active:scale-95 transition">✓ Approve</button>
+            <button onclick="rejectApp('${a.id}')"  class="flex-1 bg-red-100 text-red-500 text-xs font-bold py-2 rounded-lg active:scale-95 transition">✕ Reject</button>
+        </div>
+    </div>`).join('');
+}
+
+async function loadProviders() {
+    const el = document.getElementById('providers-list');
+    const res = await fetch('/api/admin/funeral-providers');
+    const data = await res.json();
+    if (!data.length) { el.innerHTML = '<p class="text-xs text-gray-400 italic text-center py-4">No live providers yet.</p>'; return; }
+    el.innerHTML = data.map(p => `
+    <div class="bg-white rounded-xl p-3 mb-3 border border-gray-200">
+        <div class="flex justify-between items-start mb-2">
+            <div>
+                <p class="font-bold text-sm text-gray-900">${p.name}</p>
+                <p class="text-[10px] text-gray-400">${p.category}</p>
+                <p class="text-[10px] text-gray-400">${p.address || '—'}</p>
+            </div>
+            <div class="flex flex-col gap-1 items-end">
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded ${p.is_open ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}">${p.is_open ? 'Open' : 'Closed'}</span>
+                ${p.is_vip ? '<span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-600">⭐ VIP</span>' : ''}
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="toggleVip('${p.id}', ${p.is_vip})"
+                    class="flex-1 text-xs font-bold py-2 rounded-lg border active:scale-95 transition ${p.is_vip ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-gray-50 text-gray-600 border-gray-200'}">
+                ${p.is_vip ? '★ Remove VIP' : '☆ Make VIP'}
+            </button>
+            <button onclick="toggleOpen('${p.id}', ${p.is_open})"
+                    class="flex-1 text-xs font-bold py-2 rounded-lg border active:scale-95 transition ${p.is_open ? 'bg-red-50 text-red-500 border-red-200' : 'bg-green-50 text-green-600 border-green-200'}">
+                ${p.is_open ? '⏸ Close' : '▶ Open'}
+            </button>
+        </div>
+    </div>`).join('');
+}
+
+async function approveApp(id) {
+    if (!confirm('Approve this application? This will create a live provider.')) return;
+    await fetch(`/api/admin/funeral-applications/${id}/approve`, { method: 'POST' });
+    await loadAll();
+}
+async function rejectApp(id) {
+    if (!confirm('Reject this application?')) return;
+    await fetch(`/api/admin/funeral-applications/${id}/reject`, { method: 'POST' });
+    await loadApplications();
+}
+async function toggleVip(id, current) {
+    await fetch(`/api/admin/funeral-providers/${id}/vip`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ is_vip: !current }) });
+    await loadProviders();
+}
+async function toggleOpen(id, current) {
+    await fetch(`/api/admin/funeral-providers/${id}/open`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ is_open: !current }) });
+    await loadProviders();
+}
+</script>
+</body>
+</html>

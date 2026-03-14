@@ -71,20 +71,30 @@ export function renderCartDrawer() {
     if (total) total.textContent = `${sum.toLocaleString()} RWF`;
 }
 
+function normalizePhone(raw) {
+    if (!raw) return '';
+    let digits = raw.replace(/\D/g, '');
+    if (digits.startsWith('250') && digits.length === 12) return digits;
+    if (digits.startsWith('1')   && digits.length === 11) return digits;
+    if (digits.startsWith('0')   && digits.length === 10) return '250' + digits.slice(1);
+    if (digits.length === 9) return '250' + digits;
+    return digits;
+}
+
 export async function checkoutWhatsApp(restaurantId, phone) {
     if (!cart.length) return;
 
     const lines   = cart.map(i => `- ${i.name} x${i.qty} = ${(i.price * i.qty).toLocaleString()} RWF`).join('\n');
     const sum     = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const message = encodeURIComponent(`Hello! I would like to order:\n\n${lines}\n\nTotal: ${sum.toLocaleString()} RWF\n\nThank you!`);
-
+    const normalized  = normalizePhone(phone);
     await supabase.from('orders').insert({
         restaurant_id:   restaurantId,
         items:           cart.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
         whatsapp_number: phone
     });
 
-    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${normalized}?text=${message}`, '_blank');
 }
 
 function showAddedFlash(name) {
