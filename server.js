@@ -186,6 +186,54 @@ app.get('/funeral/admin',     (_, res) => res.sendFile(join(__dirname, 'public/f
 app.get('/academy',           (_, res) => res.sendFile(join(__dirname, 'public/academy/index.html')));
 app.get('/academy/admin',     (_, res) => res.sendFile(join(__dirname, 'public/academy/admin.html')));
 
+// ── NEWS API PROXY ────────────────────────────────────────────────
+
+app.get('/news',     (_, res) => res.sendFile(join(__dirname, 'public/news/news.html')));
+
+const NEWSDATA_KEY  = process.env.NEWSDATA_API_KEY || 'pub_95437c780d99483d84460e085810bdc8';
+const NEWSDATA_BASE = 'https://newsdata.io/api/1/news';
+ 
+app.get('/api/news', async (req, res) => {
+    const category = req.query.category || 'top';
+    const page     = req.query.page     || null;
+ 
+    const categoryMap = {
+        top:      null,
+        rwanda:   null,
+        business: 'business',
+        tech:     'technology',
+        sports:   'sports',
+    };
+ 
+    const ndCat = categoryMap[category] || null;
+    let url = `${NEWSDATA_BASE}?apikey=${NEWSDATA_KEY}&country=rw&language=en`;
+    if (ndCat) url += `&category=${ndCat}`;
+    if (page)  url += `&page=${page}`;
+ 
+    try {
+        const response = await fetch(url);
+        const data     = await response.json();
+        if (data.status !== 'success') return res.status(500).json({ error: data.message || 'NewsData error' });
+ 
+        const articles = (data.results || []).map(a => ({
+            article_id:  a.article_id,
+            title:       a.title,
+            description: a.description,
+            content:     a.content,
+            image_url:   a.image_url,
+            source_name: a.source_name || a.source_id,
+            category:    a.category?.[0] || category,
+            pubDate:     a.pubDate,
+            link:        a.link,
+        }));
+ 
+        res.json({ articles, nextPage: data.nextPage || null });
+    } catch (err) {
+        console.error('[News API]', err.message);
+        res.status(500).json({ error: 'Failed to fetch news' });
+    }
+});
+
 // 404 fallback
 app.use((req, res) => {
     console.error('[404]', req.method, req.url);

@@ -186,16 +186,6 @@ export async function submitReview(providerId) {
     }
 }
 
-function normalizePhone(raw) {
-    if (!raw) return '';
-    let digits = raw.replace(/\D/g, '');
-    if (digits.startsWith('250') && digits.length === 12) return digits;
-    if (digits.startsWith('1')   && digits.length === 11) return digits;
-    if (digits.startsWith('0')   && digits.length === 10) return '250' + digits.slice(1);
-    if (digits.length === 9) return '250' + digits;
-    return digits;
-}
-
 export function contactViaWhatsApp(providerName, phone, serviceName, price) {
     const normalized  = normalizePhone(phone);
     const serviceText = serviceName
