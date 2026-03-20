@@ -180,7 +180,7 @@
 </div>
 
 <script type="module">
-    import { loadBooks, filterByCategory, searchBooks, openBookModal, closeBookModal } from '/js/academy/books.js';
+    import { loadBooks, filterByCategory, searchBooks, openBookModal, closeBookModal, loadMoreBooks } from '/js/academy/books.js';
     import { initDictionary, swapLanguages, setFromLang, setToLang }                   from '/js/academy/dictionary.js';
 
     loadBooks();
@@ -192,7 +192,8 @@
     window._swapLangs  = ()    => swapLanguages();
     window._setFromLang= (v)   => setFromLang(v);
     window._setToLang  = (v)   => setToLang(v);
-    window._openBook   = (b)   => openBookModal(b);
+    window._openBook       = (b)   => openBookModal(b);
+    window._loadMoreBooks  = ()    => loadMoreBooks();
     window._closeBook  = ()    => closeBookModal();
 
     document.getElementById('search-input').addEventListener('input', (e) => {

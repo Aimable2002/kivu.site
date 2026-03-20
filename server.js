@@ -186,6 +186,28 @@ app.get('/funeral/admin',     (_, res) => res.sendFile(join(__dirname, 'public/f
 app.get('/academy',           (_, res) => res.sendFile(join(__dirname, 'public/academy/index.html')));
 app.get('/academy/admin',     (_, res) => res.sendFile(join(__dirname, 'public/academy/admin.html')));
 
+
+// ── GUTENDEX PROXY (Project Gutenberg) ───────────────────────────
+app.get('/api/gutenberg', async (req, res) => {
+    const search    = req.query.search    || '';
+    const languages = req.query.languages || 'en';
+    const page      = req.query.page      || 1;
+ 
+    let url = `https://gutendex.com/books/?languages=${languages}&page=${page}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+ 
+    try {
+        const response = await fetch(url, {
+            headers: { 'User-Agent': 'KivuApp/1.0' }
+        });
+        const data = await response.json();
+        res.json(data);
+    } catch (err) {
+        console.error('[Gutendex]', err.message);
+        res.status(500).json({ error: 'Failed to fetch from Gutendex', results: [] });
+    }
+});
+
 // ── NEWS API PROXY ────────────────────────────────────────────────
 
 app.get('/news',     (_, res) => res.sendFile(join(__dirname, 'public/news/news.html')));

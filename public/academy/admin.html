@@ -60,13 +60,8 @@
                     <div class="space-y-2">
                         <input id="b-title" type="text" placeholder="Title *"
                                class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none transition">
-                        <select id="b-category" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none transition bg-white text-gray-700">
-                            <option>Mining & Geology</option>
-                            <option>Practical Skills</option>
-                            <option>IT & Code</option>
-                            <option>Local Laws</option>
-                            <option>Languages</option>
-                        </select>
+                        <input id="b-category" type="text" placeholder="Category * (e.g. Local Laws, Technology, History)"
+                               class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none transition">
                         <div class="flex gap-2">
                             <select id="b-language" class="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none transition bg-white text-gray-700">
                                 <option value="EN">English</option>
@@ -82,8 +77,28 @@
                         </div>
                         <input id="b-size" type="text" placeholder="File size (e.g. 1.2 MB)"
                                class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none transition">
-                        <input id="b-url" type="url" placeholder="Cloudflare R2 URL *"
-                               class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none transition">
+                        <!-- Upload or URL toggle -->
+                        <div id="b-upload-mode" data-mode="url">
+                            <div class="flex gap-2 mb-2">
+                                <button id="btn-mode-url" onclick="setBookMode('url')"
+                                        class="flex-1 bg-slate-800 text-white text-xs font-bold py-2 rounded-lg active:scale-95 transition">
+                                    🔗 Paste URL
+                                </button>
+                                <button id="btn-mode-upload" onclick="setBookMode('upload')"
+                                        class="flex-1 bg-gray-100 border border-gray-200 text-gray-600 text-xs font-bold py-2 rounded-lg active:scale-95 transition">
+                                    ☁️ Upload File
+                                </button>
+                            </div>
+                            <div id="mode-url-field">
+                                <input id="b-url" type="url" placeholder="Book URL (Supabase, Gutenberg, etc.) *"
+                                       class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none transition">
+                            </div>
+                            <div id="mode-upload-field" class="hidden">
+                                <input id="b-file" type="file" accept=".pdf,.epub,.txt"
+                                       class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none transition bg-white text-gray-700 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white">
+                                <p class="text-[10px] text-gray-400 mt-1 px-1">PDF, EPUB or TXT — saved to Supabase Storage</p>
+                            </div>
+                        </div>
                         <textarea id="b-desc" rows="2" placeholder="Description (optional)"
                                   class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none resize-none transition"></textarea>
                     </div>
@@ -180,6 +195,19 @@
     document.getElementById('admin-password').addEventListener('keydown', e => {
         if (e.key === 'Enter') window.checkPassword();
     });
+
+    window.setBookMode = (mode) => {
+        const modeEl   = document.getElementById('b-upload-mode');
+        modeEl.dataset.mode = mode;
+        document.getElementById('mode-url-field').classList.toggle('hidden',    mode !== 'url');
+        document.getElementById('mode-upload-field').classList.toggle('hidden', mode !== 'upload');
+        document.getElementById('btn-mode-url').className    = mode === 'url'
+            ? 'flex-1 bg-slate-800 text-white text-xs font-bold py-2 rounded-lg active:scale-95 transition'
+            : 'flex-1 bg-gray-100 border border-gray-200 text-gray-600 text-xs font-bold py-2 rounded-lg active:scale-95 transition';
+        document.getElementById('btn-mode-upload').className = mode === 'upload'
+            ? 'flex-1 bg-slate-800 text-white text-xs font-bold py-2 rounded-lg active:scale-95 transition'
+            : 'flex-1 bg-gray-100 border border-gray-200 text-gray-600 text-xs font-bold py-2 rounded-lg active:scale-95 transition';
+    };
 </script>
 </body>
 </html>
