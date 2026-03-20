@@ -20,31 +20,38 @@ let _gutendexPage    = 1;
 let _gutendexHasMore = true;
 let _gutendexLoading = false;
 
+// Book registry — keyed by id, avoids passing large objects through HTML attributes
+const _registry = new Map();
+
 const FORMAT_BADGE = {
     pdf:  { label: 'PDF',  cls: 'bg-red-100 text-red-700 border-red-200'        },
     epub: { label: 'EPUB', cls: 'bg-blue-100 text-blue-700 border-blue-200'     },
     text: { label: 'TXT',  cls: 'bg-green-100 text-green-700 border-green-200'  },
+    txt:  { label: 'TXT',  cls: 'bg-green-100 text-green-700 border-green-200'  },
+    zip:  { label: 'ZIP',  cls: 'bg-orange-100 text-orange-700 border-orange-200' },
     html: { label: 'HTML', cls: 'bg-purple-100 text-purple-700 border-purple-200'},
 };
 
 function pickFormat(formats) {
+    // Priority: zip (full HTML+images) → epub → plain text
     const priority = [
+        'application/octet-stream',
         'application/epub+zip',
-        'text/plain',
         'text/plain; charset=utf-8',
         'text/plain; charset=us-ascii',
-        'text/html',
+        'text/plain',
     ];
     for (const mime of priority) {
         if (formats[mime]) {
             return {
                 url:    formats[mime],
-                format: mime.includes('epub') ? 'epub' : mime.includes('html') ? 'html' : 'text',
+                format: mime.includes('octet') ? 'zip'
+                       : mime.includes('epub')  ? 'epub'
+                       : 'txt',
             };
         }
     }
-    const first = Object.entries(formats)[0];
-    return first ? { url: first[1], format: 'text' } : null;
+    return null;
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
@@ -85,6 +92,7 @@ function mergeAndRender(newBooks) {
     const fresh       = newBooks.filter(b => !existingIds.has(b.id));
     if (fresh.length) {
         _allBooks = [..._allBooks, ...fresh];
+        fresh.forEach(b => _registry.set(b.id, b));
         buildCategoryBar(_allBooks);
         applyFilters();
     }
@@ -132,7 +140,8 @@ async function fetchGutendexPage(page = 1, search = '') {
             id:              `gut_${b.id}`,
             title:           b.title,
             description:     b.authors?.[0]?.name ? `By ${b.authors[0].name}` : '',
-            category:        b.subjects?.[0] || 'General',
+            category:        'Others',
+            cover_url:       b.formats?.['image/jpeg'] || null,
             language:        (b.languages?.[0] || 'en').toUpperCase(),
             format:          picked.format,
             file_size_label: `${(b.download_count || 0).toLocaleString()} downloads`,
@@ -247,6 +256,24 @@ function applyFilters() {
     renderBooks(list);
 }
 
+// ── COVER THUMBNAIL HELPER ───────────────────────────────────────
+// Avoids nested template literal quote escaping issues
+function coverThumb(url, large = false) {
+    if (url) {
+        const img = document.createElement('img');
+        img.src     = url;
+        img.loading = 'lazy';
+        img.className = large
+            ? 'w-full h-full object-cover rounded-lg'
+            : 'w-full h-full object-cover';
+        img.onerror = function() {
+            this.parentElement.innerHTML = '<i class="fas fa-book-open text-4xl text-slate-300"></i>';
+        };
+        return img.outerHTML;
+    }
+    return '<i class="fas fa-book-open text-4xl text-slate-300"></i>';
+}
+
 // ── SKELETON ──────────────────────────────────────────────────────
 function renderSkeleton() {
     document.getElementById('books-list').innerHTML = [1,2,3].map(() => `
@@ -267,12 +294,11 @@ function renderBooks(books) {
 
     el.innerHTML = books.map(b => {
         const badge = FORMAT_BADGE[b.format] || FORMAT_BADGE.text;
-        const safe  = encodeURIComponent(JSON.stringify(b));
         return `
-        <div onclick="window._openBook('${safe}')"
+        <div onclick="window._openBook('${b.id}')"
              class="bg-white rounded-xl border border-gray-200 p-3 flex gap-3 cursor-pointer active:bg-gray-50 transition hover:border-slate-400 shadow-sm mb-3">
-            <div class="w-16 h-20 bg-slate-100 border border-slate-200 rounded-lg shrink-0 flex items-center justify-center text-2xl shadow-inner">
-                📖
+            <div class="w-16 h-20 bg-slate-100 border border-slate-200 rounded-lg shrink-0 overflow-hidden shadow-inner flex items-center justify-center">
+                ${coverThumb(b.cover_url)}
             </div>
             <div class="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                 <div>
@@ -291,8 +317,9 @@ function renderBooks(books) {
 }
 
 // ── OPEN MODAL ────────────────────────────────────────────────────
-export function openBookModal(encoded) {
-    const b     = JSON.parse(decodeURIComponent(encoded));
+export function openBookModal(id) {
+    const b = _registry.get(id);
+    if (!b) return;
     const badge = FORMAT_BADGE[b.format] || FORMAT_BADGE.text;
 
     document.getElementById('modal-book-title').textContent = b.title;
@@ -300,9 +327,9 @@ export function openBookModal(encoded) {
     document.getElementById('modal-book-desc').textContent  = b.description || 'No description available.';
     document.getElementById('modal-book-size').textContent  = b.file_size_label || '';
 
-    const iconEl       = document.getElementById('modal-book-icon');
-    iconEl.className   = 'text-4xl';
-    iconEl.textContent = '📖';
+    const iconEl = document.getElementById('modal-book-icon');
+    const iconWrap     = iconEl.parentElement;
+    iconWrap.innerHTML = coverThumb(b.cover_url, true);
 
     const badgeEl       = document.getElementById('modal-book-badge');
     badgeEl.textContent = badge.label;
@@ -323,19 +350,34 @@ async function downloadBook(b) {
     btn.disabled  = true;
 
     if (b.source === 'supabase') {
+        // Supabase books — direct download, increment count
         supabase.from('books')
             .update({ download_count: (b.download_count || 0) + 1 })
             .eq('id', b.id);
-    }
 
-    const a    = document.createElement('a');
-    a.href     = b.r2_url;
-    a.download = b.title.replace(/[^\w\s-]/g, '').trim() + '.' + b.format;
-    a.target   = '_blank';
-    a.rel      = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+        const a    = document.createElement('a');
+        a.href     = b.r2_url;
+        a.download = b.title.replace(/[^\w\s-]/g, '').trim() + '.' + b.format;
+        a.target   = '_blank';
+        a.rel      = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+    } else {
+        // Gutendex books — route through Express proxy for correct filename
+        const params = new URLSearchParams({
+            url:    b.r2_url,
+            title:  b.title,
+            format: b.format,
+        });
+        const a    = document.createElement('a');
+        a.href     = `/api/gutenberg/download?${params}`;
+        a.download = b.title.replace(/[^\w\s-]/g, '').trim() + '.' + b.format;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
 
     setTimeout(() => {
         btn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Download File';

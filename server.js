@@ -208,6 +208,41 @@ app.get('/api/gutenberg', async (req, res) => {
     }
 });
 
+
+// ── GUTENDEX DOWNLOAD PROXY ──────────────────────────────────────
+// Pipes the file through Express so browser gets correct filename + headers
+// Without this, cross-origin <a download> is ignored and browser just navigates
+app.get('/api/gutenberg/download', async (req, res) => {
+    const { url, title, format } = req.query;
+    if (!url) return res.status(400).json({ error: 'url required' });
+ 
+    try {
+        const response = await fetch(decodeURIComponent(url), {
+            headers: { 'User-Agent': 'KivuApp/1.0' }
+        });
+ 
+        if (!response.ok) return res.status(502).json({ error: 'Failed to fetch file' });
+ 
+        const ext      = format || 'epub';
+        const filename = (title || 'book').replace(/[^\w\s-]/g, '').trim() + '.' + ext;
+        const mime     = ext === 'epub' ? 'application/epub+zip'
+                       : ext === 'html' ? 'text/html'
+                       : 'text/plain';
+ 
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', mime);
+ 
+        // Pipe file bytes directly to response
+        const { Readable } = await import('stream');
+        Readable.fromWeb(response.body).pipe(res);
+ 
+    } catch (err) {
+        console.error('[Gutendex download]', err.message);
+        res.status(500).json({ error: 'Download failed' });
+    }
+});
+ 
+
 // ── NEWS API PROXY ────────────────────────────────────────────────
 
 app.get('/news',     (_, res) => res.sendFile(join(__dirname, 'public/news/news.html')));
