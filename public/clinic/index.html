@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Clinics & Healthcare — Kivu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .no-scrollbar::-webkit-scrollbar{display:none} .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+        :root { --accent: #1D4ED8; --accent-light: #3B82F6; --accent-bg: #EFF6FF; }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full bg-white shadow-2xl flex flex-col relative">
+
+    <!-- Header -->
+    <div style="background:#1D4ED8" class="text-white pt-10 pb-4 px-4 shrink-0">
+        <div class="flex items-center justify-between mb-3">
+            <button onclick="window.location.href='/'" class="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </button>
+            <div>
+                <h1 class="font-black text-xl leading-none">🏥 Clinics</h1>
+                <p class="text-[11px] text-white/70 mt-0.5">Doctors, Clinics & Healthcare in Kigali</p>
+            </div>
+            <button onclick="window._openMap()" class="bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <i class="fas fa-map-marker-alt"></i> Map
+            </button>
+        </div>
+        <div class="relative">
+            <i class="fas fa-search absolute left-3 top-3 text-white/60 text-sm"></i>
+            <input id="search-input" type="text" placeholder="Search clinics, doctors, specialties..."
+                   class="w-full bg-white/20 text-white placeholder-white/60 rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none">
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex gap-2 px-4 py-3 overflow-x-auto no-scrollbar shrink-0 border-b border-gray-100">
+        <button onclick="window._clearFilters()" class="shrink-0 text-white px-4 py-1.5 rounded-full text-xs font-bold" style="background:#1D4ED8">All</button>
+        <button onclick="window._toggleOpen(this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">🟢 Open Now</button>
+        <button onclick="window._toggleRating(this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">⭐ Top Rated</button>
+        <button onclick="window._toggleTag('emergency', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">🚑 Emergency</button>
+        <button onclick="window._toggleTag('insurance', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">🛡️ Insurance</button>
+        <button onclick="window._toggleTag('lab', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">🧪 Lab Tests</button>
+        <button onclick="window._toggleTag('pediatric', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">👶 Pediatric</button>
+        <button onclick="window._toggleTag('dental', this)" class="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold">🦷 Dental</button>
+    </div>
+
+    <!-- Feed -->
+    <div class="flex-1 overflow-y-auto no-scrollbar px-4 pt-4 pb-24">
+        <div id="clinic-feed" class="space-y-4">
+            <!-- Mock cards for frontend preview -->
+            <div onclick="window.location.href='/clinic/detail?id=1'" class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm active:scale-[0.98] transition cursor-pointer">
+                <div class="relative h-36 bg-blue-900">
+                    <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover opacity-80">
+                    <div class="absolute top-3 left-3 flex gap-1.5">
+                        <span class="bg-blue-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase">General</span>
+                        <span class="bg-green-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full">🟢 Open</span>
+                    </div>
+                    <div class="absolute top-3 right-3 bg-yellow-400 text-black text-[9px] font-black px-2 py-0.5 rounded">⭐ VIP</div>
+                </div>
+                <div class="p-3">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="font-black text-gray-900 text-sm">Kigali Medical Center</h3>
+                        <span class="text-amber-500 text-xs font-bold flex items-center gap-0.5"><i class="fas fa-star text-[10px]"></i> 4.8</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mb-2"><i class="fas fa-map-marker-alt mr-1"></i>Kimihurura, Kigali · 1.2 km</p>
+                    <div class="flex gap-1.5 flex-wrap">
+                        <span class="bg-blue-50 text-blue-600 text-[9px] font-bold px-2 py-0.5 rounded-full">🚑 Emergency</span>
+                        <span class="bg-blue-50 text-blue-600 text-[9px] font-bold px-2 py-0.5 rounded-full">🛡️ Insurance</span>
+                        <span class="bg-blue-50 text-blue-600 text-[9px] font-bold px-2 py-0.5 rounded-full">🧪 Lab</span>
+                    </div>
+                </div>
+            </div>
+
+            <div onclick="window.location.href='/clinic/detail?id=2'" class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm active:scale-[0.98] transition cursor-pointer">
+                <div class="relative h-36 bg-blue-900">
+                    <img src="https://images.unsplash.com/photo-1538108149393-fbbd81895907?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover opacity-80">
+                    <div class="absolute top-3 left-3 flex gap-1.5">
+                        <span class="bg-blue-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase">Dental</span>
+                        <span class="bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full">⚫ Closed</span>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="font-black text-gray-900 text-sm">Bright Smile Dental Clinic</h3>
+                        <span class="text-amber-500 text-xs font-bold flex items-center gap-0.5"><i class="fas fa-star text-[10px]"></i> 4.6</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mb-2"><i class="fas fa-map-marker-alt mr-1"></i>Nyamirambo, Kigali · 2.8 km</p>
+                    <div class="flex gap-1.5 flex-wrap">
+                        <span class="bg-blue-50 text-blue-600 text-[9px] font-bold px-2 py-0.5 rounded-full">🦷 Dental</span>
+                        <span class="bg-blue-50 text-blue-600 text-[9px] font-bold px-2 py-0.5 rounded-full">🛡️ Insurance</span>
+                    </div>
+                </div>
+            </div>
+
+            <div onclick="window.location.href='/clinic/detail?id=3'" class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm active:scale-[0.98] transition cursor-pointer">
+                <div class="relative h-36 bg-blue-900">
+                    <img src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover opacity-80">
+                    <div class="absolute top-3 left-3 flex gap-1.5">
+                        <span class="bg-blue-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase">Pediatric</span>
+                        <span class="bg-green-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full">🟢 Open</span>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="font-black text-gray-900 text-sm">Little Angels Children's Clinic</h3>
+                        <span class="text-amber-500 text-xs font-bold flex items-center gap-0.5"><i class="fas fa-star text-[10px]"></i> 4.9</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mb-2"><i class="fas fa-map-marker-alt mr-1"></i>Remera, Kigali · 3.5 km</p>
+                    <div class="flex gap-1.5 flex-wrap">
+                        <span class="bg-blue-50 text-blue-600 text-[9px] font-bold px-2 py-0.5 rounded-full">👶 Pediatric</span>
+                        <span class="bg-blue-50 text-blue-600 text-[9px] font-bold px-2 py-0.5 rounded-full">🧪 Lab</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="pagination"></div>
+    </div>
+
+    <!-- FAB -->
+    <a href="/clinic/merchant"
+       class="absolute right-4 text-white rounded-full flex items-center gap-2 px-5 h-14 shadow-xl active:scale-95 transition z-20"
+       style="bottom: max(3.5rem, env(safe-area-inset-bottom)); background:#1D4ED8">
+        <i class="fas fa-hospital text-base"></i>
+        <span class="text-sm font-bold">List My Clinic</span>
+    </a>
+</div>
+
+<!-- Map overlay -->
+<div id="map-overlay" class="hidden absolute inset-0 z-[100] flex flex-col" style="position:fixed">
+    <div class="bg-white w-full h-[95%] mt-auto rounded-t-3xl flex flex-col overflow-hidden shadow-2xl">
+        <div class="flex justify-between items-center px-4 pt-4 pb-2 shrink-0">
+            <div>
+                <h3 class="font-bold text-gray-900 text-base">Clinic Map</h3>
+                <p id="map-count" class="text-[10px] text-gray-400 mt-0.5">Loading...</p>
+            </div>
+            <button onclick="window._closeMap()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-times text-gray-600 text-sm"></i>
+            </button>
+        </div>
+        <div class="px-4 pb-3 shrink-0">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                <input id="map-search" type="text" placeholder="Search clinic or location..."
+                       class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-8 pr-4 py-2 text-sm outline-none">
+            </div>
+        </div>
+        <div id="leaflet-map" class="flex-1"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { renderFeed, openCenter } from '/js/clinic/feed.js';
+    import { openMap, closeMap, mapSearch } from '/js/clinic/map.js';
+
+    let state = { open: false, rating: false, tags: [], search: '' };
+    renderFeed(1, {});
+
+    window._openCenter   = openCenter;
+    window._changePage   = (p) => renderFeed(p, state);
+    window._openMap      = openMap;
+    window._closeMap     = closeMap;
+    window._mapSearch    = (q) => mapSearch(q);
+
+    window._toggleOpen = (btn) => {
+        state.open = !state.open;
+        btn.classList.toggle('text-white', state.open);
+        btn.style.background = state.open ? '#1D4ED8' : '';
+        renderFeed(1, state);
+    };
+    window._toggleRating = (btn) => {
+        state.rating = !state.rating;
+        btn.classList.toggle('text-white', state.rating);
+        btn.style.background = state.rating ? '#1D4ED8' : '';
+        renderFeed(1, state);
+    };
+    window._toggleTag = (tag, btn) => {
+        const idx = state.tags.indexOf(tag);
+        if (idx === -1) { state.tags.push(tag); btn.style.background = '#1D4ED8'; btn.classList.add('text-white'); }
+        else { state.tags.splice(idx,1); btn.style.background = ''; btn.classList.remove('text-white'); }
+        renderFeed(1, state);
+    };
+    window._clearFilters = () => {
+        state = { open:false, rating:false, tags:[], search:'' };
+        document.getElementById('search-input').value = '';
+        renderFeed(1, {});
+    };
+
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        clearTimeout(window._sd);
+        window._sd = setTimeout(() => {
+            state.search = e.target.value.trim();
+            renderFeed(1, state);
+        }, 350);
+    });
+</script>
+</body>
+</html>

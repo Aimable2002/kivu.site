@@ -186,6 +186,13 @@ app.get('/funeral/admin',     (_, res) => res.sendFile(join(__dirname, 'public/f
 app.get('/academy',           (_, res) => res.sendFile(join(__dirname, 'public/academy/index.html')));
 app.get('/academy/admin',     (_, res) => res.sendFile(join(__dirname, 'public/academy/admin.html')));
 
+app.get('/dating',           (_, res) => res.sendFile(join(__dirname, 'public/dating/dating.html')));
+
+app.get('/clinic',           (_, res) => res.sendFile(join(__dirname, 'public/clinic/index.html')));
+app.get('/clinic/detail',     (_, res) => res.sendFile(join(__dirname, 'public/clinic/detail.html')));
+app.get('/clinic/merchant',     (_, res) => res.sendFile(join(__dirname, 'public/clinic/merchant.html')));
+app.get('/clinic/admin',     (_, res) => res.sendFile(join(__dirname, 'public/clinic/admin.html')));
+
 
 // ── GUTENDEX PROXY (Project Gutenberg) ───────────────────────────
 app.get('/api/gutenberg', async (req, res) => {

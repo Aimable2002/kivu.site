@@ -3,248 +3,473 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kivu Match - Dark Premium</title>
+    <title>Kivu Match</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Simple, hardware-accelerated animations */
-        .swipe-left { transform: translateX(-150%) rotate(-15deg); opacity: 0; transition: all 0.4s ease-out; }
+        .swipe-left  { transform: translateX(-150%) rotate(-15deg); opacity: 0; transition: all 0.4s ease-out; }
         .swipe-right { transform: translateX(150%) rotate(15deg); opacity: 0; transition: all 0.4s ease-out; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        .fade-in     { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        /* Hide scrollbars */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Custom Dark Ruby Theme */
-        .bg-match-dark { background-color: #0a0202; } /* Очень темный, почти черный с красным отливом */
-        .bg-match-panel { background-color: #1a0505; } /* Цвет панелей */
-        .text-match-accent { color: #e11d48; } /* Rose-600 */
-        .border-match-accent { border-color: #e11d48; }
+        .bg-match-dark   { background-color: #0a0202; }
+        .bg-match-panel  { background-color: #1a0505; }
+        .text-match-accent { color: #e11d48; }
+        /* Chat bubbles */
+        .bubble-me   { background: #e11d48; color: #fff; border-radius: 18px 18px 4px 18px; }
+        .bubble-them { background: #1a0505; color: #e5e7eb; border-radius: 18px 18px 18px 4px; border: 1px solid rgba(255,255,255,0.07); }
+        /* Typing dots */
+        @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+        .dot1{animation:blink 1.2s infinite .0s}
+        .dot2{animation:blink 1.2s infinite .2s}
+        .dot3{animation:blink 1.2s infinite .4s}
+        /* Realtime pulse */
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+        .realtime-dot { animation: pulse 2s ease-in-out infinite; }
     </style>
 </head>
 <body class="bg-black h-screen w-full flex justify-center overflow-hidden font-sans text-gray-200">
 
-    <div class="w-full max-w-md h-full relative bg-match-dark flex flex-col shadow-2xl overflow-hidden border-x border-red-900/20">
-        
-        <div class="bg-gradient-to-b from-[#2a0808] to-transparent pt-10 pb-4 px-5 shrink-0 z-20 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <button class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition text-white">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <h2 class="font-bold text-2xl tracking-tighter text-white">
-                    Kivu<span class="text-match-accent italic">Match</span>
-                </h2>
+<div class="w-full max-w-md h-full relative bg-match-dark flex flex-col shadow-2xl overflow-hidden border-x border-red-900/20">
+
+    <!-- ───── HEADER ───── -->
+    <div class="bg-gradient-to-b from-[#2a0808] to-transparent pt-10 pb-4 px-5 shrink-0 z-20 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <button onclick="history.back()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2 class="font-bold text-2xl tracking-tighter text-white">
+                Kivu<span class="text-match-accent italic">Match</span>
+            </h2>
+        </div>
+        <button class="bg-white/10 text-white w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition">
+            <i class="fas fa-sliders-h"></i>
+        </button>
+    </div>
+
+    <!-- ───── VIEW: DISCOVER ───── -->
+    <div id="view-discover" class="flex-1 relative overflow-hidden flex flex-col fade-in">
+        <div id="tinder-card" class="absolute inset-x-4 top-0 bottom-28 bg-gray-900 rounded-3xl shadow-[0_10px_30px_rgba(225,29,72,0.15)] overflow-hidden transform origin-bottom transition-transform duration-300 z-10 border border-white/10">
+            <img src="https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover opacity-90">
+            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/60 to-transparent p-6 pt-32 text-white">
+                <div class="flex justify-between items-end mb-3">
+                    <span class="bg-rose-600 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border border-rose-500">💍 Marriage</span>
+                    <button class="bg-black/50 backdrop-blur border border-white/20 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 text-rose-300">
+                        <i class="fas fa-play"></i> Listen
+                    </button>
+                </div>
+                <h3 class="text-3xl font-black mb-1 flex items-center gap-2 drop-shadow-lg">
+                    Aisha, 24 <i class="fas fa-check-circle text-blue-400 text-xl" title="ID Verified"></i>
+                </h3>
+                <p class="text-sm text-gray-300 mb-4 flex items-center gap-2">
+                    <i class="fas fa-map-marker-alt text-match-accent"></i> Kigali (3 km away)
+                </p>
+                <div class="flex gap-2 flex-wrap">
+                    <span class="bg-white/10 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold border border-white/5">☪️ Muslim</span>
+                    <span class="bg-white/10 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold border border-white/5">🗣️ Swahili, EN</span>
+                    <span class="bg-white/10 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold border border-white/5">🎵 Music</span>
+                </div>
             </div>
-            <button class="bg-white/10 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-sm active:scale-95 transition hover:bg-match-accent hover:text-white">
-                <i class="fas fa-sliders-h"></i>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="absolute bottom-6 left-0 w-full flex justify-center items-center gap-6 z-20 px-6">
+            <button onclick="swipe('left')" class="w-14 h-14 bg-match-panel text-gray-400 rounded-full shadow-lg flex items-center justify-center text-2xl border border-white/10 hover:scale-110 hover:text-white transition-all active:scale-90">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="relative">
+                <button onclick="alert('Pay 1000 RWF via Kivu Pay to send a Direct Message immediately!')"
+                        class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 text-black rounded-full shadow-[0_0_20px_rgba(234,179,8,0.3)] flex items-center justify-center text-xl hover:scale-110 transition-transform active:scale-90 border border-yellow-200">
+                    <i class="fas fa-envelope"></i>
+                </button>
+                <div class="absolute -top-1 -right-2 bg-black text-yellow-400 text-[8px] font-black px-2 py-0.5 rounded-full border border-yellow-500 uppercase tracking-wider">VIP</div>
+            </div>
+            <button onclick="swipe('right')" class="w-16 h-16 bg-gradient-to-br from-rose-500 to-red-700 text-white rounded-full shadow-[0_0_25px_rgba(225,29,72,0.5)] flex items-center justify-center text-3xl hover:scale-110 transition-transform active:scale-90 border border-rose-400/50">
+                <i class="fas fa-heart"></i>
             </button>
         </div>
+    </div>
 
-        <div id="view-discover" class="flex-1 relative overflow-hidden flex flex-col fade-in">
-            
-            <div id="tinder-card" class="absolute inset-x-4 top-0 bottom-28 bg-gray-900 rounded-3xl shadow-[0_10px_30px_rgba(225,29,72,0.15)] overflow-hidden transform origin-bottom transition-transform duration-300 z-10 border border-white/10">
-                
-                <img src="https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover opacity-90">
-                
-                <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/60 to-transparent p-6 pt-32 text-white">
-                    
-                    <div class="flex justify-between items-end mb-3">
-                        <span class="bg-rose-600 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg uppercase tracking-wider border border-rose-500">
-                            💍 Marriage
-                        </span>
-                        
-                        <button class="bg-black/50 backdrop-blur border border-white/20 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 hover:bg-white/20 transition text-rose-300">
-                            <i class="fas fa-play"></i> Listen
-                        </button>
-                    </div>
-
-                    <h3 class="text-3xl font-black mb-1 flex items-center gap-2 drop-shadow-lg text-white">
-                        Aisha, 24 
-                        <i class="fas fa-check-circle text-blue-400 text-xl drop-shadow-md" title="ID Verified"></i>
-                    </h3>
-                    
-                    <p class="text-sm text-gray-300 mb-4 flex items-center gap-2 font-medium">
-                        <i class="fas fa-map-marker-alt text-match-accent"></i> Kigali (3 km away)
-                    </p>
-
-                    <div class="flex gap-2 flex-wrap">
-                        <span class="bg-white/10 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold border border-white/5 text-gray-200">☪️ Muslim</span>
-                        <span class="bg-white/10 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold border border-white/5 text-gray-200">🗣️ Swahili, EN</span>
-                        <span class="bg-white/10 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold border border-white/5 text-gray-200">🎵 Music</span>
-                    </div>
-                </div>
+    <!-- ───── VIEW: LIKES ───── -->
+    <div id="view-likes" class="hidden flex-1 overflow-y-auto bg-match-dark p-5 fade-in pb-24">
+        <div class="text-center mb-8 mt-4">
+            <div class="w-20 h-20 bg-match-panel border-2 border-match-accent/30 text-match-accent rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-[0_0_30px_rgba(225,29,72,0.2)]">
+                <i class="fas fa-heart"></i>
             </div>
-
-            <div class="absolute bottom-6 left-0 w-full flex justify-center items-center gap-6 z-20 px-6">
-                
-                <button onclick="swipe('left')" class="w-14 h-14 bg-match-panel text-gray-400 rounded-full shadow-lg flex items-center justify-center text-2xl border border-white/10 hover:scale-110 hover:text-white transition-all active:scale-90">
-                    <i class="fas fa-times"></i>
-                </button>
-                
-                <div class="relative group">
-                    <button onclick="alert('Pay 1000 RWF via Kivu Pay to send a Direct Message immediately!')" class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 text-black rounded-full shadow-[0_0_20px_rgba(234,179,8,0.3)] flex items-center justify-center text-xl hover:scale-110 transition-transform active:scale-90 border border-yellow-200">
-                        <i class="fas fa-envelope"></i>
-                    </button>
-                    <div class="absolute -top-1 -right-2 bg-black text-yellow-400 text-[8px] font-black px-2 py-0.5 rounded-full border border-yellow-500 shadow-md uppercase tracking-wider">VIP</div>
-                </div>
-
-                <button onclick="swipe('right')" class="w-16 h-16 bg-gradient-to-br from-rose-500 to-red-700 text-white rounded-full shadow-[0_0_25px_rgba(225,29,72,0.5)] flex items-center justify-center text-3xl hover:scale-110 transition-transform active:scale-90 border border-rose-400/50">
-                    <i class="fas fa-heart"></i>
-                </button>
-
-            </div>
+            <h3 class="font-bold text-xl text-white mb-1">5 People like you</h3>
+            <p class="text-xs text-gray-400 max-w-[250px] mx-auto">Upgrade to VIP to see their photos and match instantly.</p>
+            <button class="mt-5 bg-match-accent text-white font-bold px-8 py-3 rounded-full shadow-[0_5px_20px_rgba(225,29,72,0.4)] active:scale-95 transition uppercase text-xs">
+                Unlock VIP (5000 RWF)
+            </button>
         </div>
-
-        <div id="view-likes" class="hidden flex-1 overflow-y-auto bg-match-dark p-5 fade-in pb-24">
-            
-            <div class="text-center mb-8 mt-4">
-                <div class="w-20 h-20 bg-match-panel border-2 border-match-accent/30 text-match-accent rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-[0_0_30px_rgba(225,29,72,0.2)]">
-                    <i class="fas fa-heart"></i>
-                </div>
-                <h3 class="font-bold text-xl text-white mb-1">5 People like you</h3>
-                <p class="text-xs text-gray-400 max-w-[250px] mx-auto">Upgrade to VIP to see their photos and match instantly.</p>
-                <button class="mt-5 bg-match-accent text-white font-bold px-8 py-3 rounded-full shadow-[0_5px_20px_rgba(225,29,72,0.4)] hover:bg-rose-700 active:scale-95 transition tracking-wide uppercase text-xs">
-                    Unlock VIP (5000 RWF)
-                </button>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-match-panel rounded-2xl p-2 shadow-lg relative overflow-hidden h-56 border border-white/5">
-                    <img src="https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=300&q=20" class="w-full h-full object-cover rounded-xl blur-lg scale-110 opacity-60">
-                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div class="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10">
-                            <i class="fas fa-lock text-xl text-white/80"></i>
-                        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-match-panel rounded-2xl p-2 shadow-lg relative overflow-hidden h-56 border border-white/5">
+                <img src="https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=300&q=20" class="w-full h-full object-cover rounded-xl blur-lg scale-110 opacity-60">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10">
+                        <i class="fas fa-lock text-xl text-white/80"></i>
                     </div>
                 </div>
-                <div class="bg-match-panel rounded-2xl p-2 shadow-lg relative overflow-hidden h-56 border border-white/5">
-                    <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=300&q=20" class="w-full h-full object-cover rounded-xl blur-lg scale-110 opacity-60">
-                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div class="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10">
-                            <i class="fas fa-lock text-xl text-white/80"></i>
-                        </div>
+            </div>
+            <div class="bg-match-panel rounded-2xl p-2 shadow-lg relative overflow-hidden h-56 border border-white/5">
+                <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=300&q=20" class="w-full h-full object-cover rounded-xl blur-lg scale-110 opacity-60">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10">
+                        <i class="fas fa-lock text-xl text-white/80"></i>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div id="view-chats" class="hidden flex-1 overflow-y-auto bg-match-dark p-5 fade-in pb-24">
-            
-            <h3 class="font-bold text-white mb-4 text-sm tracking-wider uppercase">New Matches</h3>
-            
-            <div class="flex gap-4 overflow-x-auto no-scrollbar mb-8 pb-2">
-                <div class="flex flex-col items-center gap-2 cursor-pointer">
-                    <div class="w-16 h-16 rounded-full border-2 border-match-accent p-0.5 relative">
-                        <img src="https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=150&q=80" class="w-full h-full rounded-full object-cover">
-                        <div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-black rounded-full"></div>
-                    </div>
-                    <span class="text-xs font-bold text-gray-200">Aisha</span>
+    <!-- ───── VIEW: CHATS LIST ───── -->
+    <div id="view-chats" class="hidden flex-1 overflow-y-auto no-scrollbar bg-match-dark p-5 fade-in pb-24">
+
+        <!-- Realtime status -->
+        <div id="realtime-status" class="flex items-center gap-2 mb-4">
+            <span class="w-2 h-2 bg-green-400 rounded-full realtime-dot"></span>
+            <span class="text-[10px] text-green-400 font-bold">Realtime connected</span>
+        </div>
+
+        <h3 class="font-bold text-white mb-4 text-sm tracking-wider uppercase">New Matches</h3>
+        <div class="flex gap-4 overflow-x-auto no-scrollbar mb-8 pb-2">
+            <div onclick="openChat('aisha')" class="flex flex-col items-center gap-2 cursor-pointer">
+                <div class="w-16 h-16 rounded-full border-2 border-match-accent p-0.5 relative">
+                    <img src="https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=150&q=80" class="w-full h-full rounded-full object-cover">
+                    <div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-black rounded-full"></div>
                 </div>
-                
-                <div class="flex flex-col items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition">
-                    <div class="w-16 h-16 rounded-full border border-white/20 p-0.5 bg-match-panel flex items-center justify-center">
-                        <i class="fas fa-heart text-2xl text-gray-600"></i>
-                    </div>
-                    <span class="text-xs font-bold text-gray-400">Likes</span>
-                </div>
+                <span class="text-xs font-bold text-gray-200">Aisha</span>
             </div>
+            <div class="flex flex-col items-center gap-2 cursor-pointer opacity-70">
+                <div class="w-16 h-16 rounded-full border border-white/20 p-0.5 bg-match-panel flex items-center justify-center">
+                    <i class="fas fa-heart text-2xl text-gray-600"></i>
+                </div>
+                <span class="text-xs font-bold text-gray-400">+4 more</span>
+            </div>
+        </div>
 
-            <h3 class="font-bold text-white mb-4 text-sm tracking-wider uppercase border-t border-white/10 pt-6">Messages</h3>
-            
-            <div class="flex items-center gap-4 bg-gradient-to-r from-yellow-900/40 to-transparent p-3 rounded-2xl border border-yellow-700/50 mb-3 cursor-pointer active:bg-white/5 transition">
+        <h3 class="font-bold text-white mb-4 text-sm tracking-wider uppercase border-t border-white/10 pt-6">Messages</h3>
+
+        <!-- Chat preview rows — populated dynamically -->
+        <div id="chat-list">
+            <div onclick="openChat('john')" class="flex items-center gap-4 bg-gradient-to-r from-yellow-900/40 to-transparent p-3 rounded-2xl border border-yellow-700/50 mb-3 cursor-pointer active:bg-white/5 transition">
                 <div class="relative">
                     <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80" class="w-14 h-14 rounded-full object-cover border border-yellow-500">
-                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase">VIP</div>
+                    <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase">VIP</div>
                 </div>
                 <div class="flex-1">
                     <div class="flex justify-between items-center mb-1">
                         <h4 class="font-bold text-sm text-yellow-500">John</h4>
-                        <span class="text-[9px] text-gray-500">Just now</span>
+                        <span id="john-time" class="text-[9px] text-gray-500">Just now</span>
                     </div>
-                    <p class="text-xs text-gray-300 line-clamp-1">Hey! I saw your profile and just had to say hi...</p>
+                    <p id="john-preview" class="text-xs text-gray-300 line-clamp-1">Hey! I saw your profile and just had to say hi...</p>
                 </div>
+                <span id="john-badge" class="hidden w-5 h-5 bg-match-accent text-white text-[9px] font-black rounded-full flex items-center justify-center">1</span>
             </div>
 
-            <div class="flex items-center gap-4 p-3 rounded-2xl cursor-pointer hover:bg-white/5 active:bg-white/10 transition">
+            <div onclick="openChat('sarah')" class="flex items-center gap-4 p-3 rounded-2xl cursor-pointer hover:bg-white/5 active:bg-white/10 transition">
                 <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=150&q=80" class="w-14 h-14 rounded-full object-cover border border-white/10">
                 <div class="flex-1 border-b border-white/5 pb-3">
                     <div class="flex justify-between items-center mb-1">
                         <h4 class="font-bold text-sm text-white">Sarah</h4>
-                        <span class="text-[9px] text-gray-500">2h ago</span>
+                        <span id="sarah-time" class="text-[9px] text-gray-500">2h ago</span>
                     </div>
-                    <p class="text-xs text-gray-400 line-clamp-1">Yes, I love going to Kivu lake! 🌊</p>
+                    <p id="sarah-preview" class="text-xs text-gray-400 line-clamp-1">Yes, I love going to Kivu lake! 🌊</p>
                 </div>
             </div>
-
         </div>
-
-        <div class="bg-match-panel border-t border-red-900/30 flex justify-between items-center px-8 py-3 pb-6 shrink-0 z-50">
-            
-            <button onclick="switchTab('discover')" id="nav-discover" class="nav-btn text-match-accent flex flex-col items-center gap-1 transition-colors">
-                <i class="fas fa-layer-group text-xl mb-0.5"></i>
-                <span class="text-[10px] font-bold">Discover</span>
-            </button>
-            
-            <button onclick="switchTab('likes')" id="nav-likes" class="nav-btn text-gray-500 hover:text-rose-400 flex flex-col items-center gap-1 relative transition-colors">
-                <i class="fas fa-heart text-xl mb-0.5"></i>
-                <span class="text-[10px] font-bold">Likes</span>
-                <span class="absolute -top-1 -right-2 bg-match-accent text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full border border-match-panel shadow-sm">5+</span>
-            </button>
-            
-            <button onclick="switchTab('chats')" id="nav-chats" class="nav-btn text-gray-500 hover:text-rose-400 flex flex-col items-center gap-1 transition-colors relative">
-                <i class="fas fa-comment-dots text-xl mb-0.5"></i>
-                <span class="text-[10px] font-bold">Chats</span>
-                <span class="absolute top-0 right-1 w-2.5 h-2.5 bg-green-500 border-2 border-match-panel rounded-full"></span>
-            </button>
-
-        </div>
-
     </div>
 
-    <script>
-        function switchTab(tab) {
-            // 1. Hide all views
-            ['discover', 'likes', 'chats'].forEach(t => {
-                document.getElementById('view-' + t).classList.add('hidden');
-            });
-            
-            // 2. Show selected view
-            document.getElementById('view-' + tab).classList.remove('hidden');
-            
-            // 3. Reset all nav buttons to gray
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-match-accent');
-                btn.classList.add('text-gray-500');
-            });
-            
-            // 4. Highlight the selected nav button (Red)
-            const activeBtn = document.getElementById('nav-' + tab);
-            activeBtn.classList.remove('text-gray-500');
-            activeBtn.classList.add('text-match-accent');
-        }
+    <!-- ───── VIEW: CHAT ROOM ───── -->
+    <div id="view-chatroom" class="hidden flex-1 flex flex-col bg-match-dark fade-in">
 
-        // Simple mock swipe animation for old phones
-        function swipe(direction) {
-            const card = document.getElementById('tinder-card');
-            
-            // Add CSS class to fly away
-            if(direction === 'left') card.classList.add('swipe-left');
-            if(direction === 'right') card.classList.add('swipe-right');
-            
-            // After animation finishes (400ms), reset and show a new "mock" card
-            setTimeout(() => {
-                card.classList.remove('swipe-left', 'swipe-right');
-                card.style.opacity = '0';
-                
-                // Simulate loading next profile
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                }, 100);
-                
-            }, 400);
-        }
-    </script>
+        <!-- Chat header -->
+        <div class="flex items-center gap-3 px-4 py-3 border-b border-red-900/30 bg-[#120303] shrink-0">
+            <button onclick="closeChat()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-95 transition">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </button>
+            <div class="relative">
+                <img id="chat-avatar" src="" class="w-10 h-10 rounded-full object-cover border border-match-accent/40">
+                <div id="chat-online-dot" class="hidden absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#120303] rounded-full"></div>
+            </div>
+            <div class="flex-1">
+                <p id="chat-name" class="font-bold text-sm text-white"></p>
+                <p id="chat-status" class="text-[10px] text-green-400">Online</p>
+            </div>
+            <button class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 active:scale-95 transition">
+                <i class="fas fa-ellipsis-v text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Messages -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto no-scrollbar px-4 pt-4 pb-2 space-y-3">
+            <!-- Messages injected here -->
+        </div>
+
+        <!-- Typing indicator -->
+        <div id="typing-indicator" class="hidden px-4 pb-1">
+            <div class="inline-flex items-center gap-1 bg-match-panel px-3 py-2 rounded-2xl border border-white/5">
+                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full dot1"></span>
+                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full dot2"></span>
+                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full dot3"></span>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="px-4 py-3 border-t border-red-900/30 bg-[#120303] shrink-0 flex items-end gap-2" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom))">
+            <div class="flex-1 bg-match-panel border border-white/10 rounded-2xl px-4 py-2.5 flex items-center gap-2">
+                <input id="chat-input" type="text" placeholder="Type a message..."
+                       class="flex-1 bg-transparent text-sm text-white placeholder-gray-600 outline-none"
+                       oninput="onTyping()" onkeydown="if(event.key==='Enter')sendMessage()">
+                <button onclick="document.getElementById('chat-input').value += ' 😊';" class="text-gray-500 hover:text-match-accent transition">
+                    <i class="far fa-smile"></i>
+                </button>
+            </div>
+            <button onclick="sendMessage()"
+                    class="w-11 h-11 bg-match-accent rounded-full flex items-center justify-center text-white active:scale-95 transition shadow-[0_0_15px_rgba(225,29,72,0.4)] shrink-0">
+                <i class="fas fa-paper-plane text-sm"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ───── BOTTOM NAV ───── -->
+    <div class="bg-match-panel border-t border-red-900/30 flex justify-between items-center px-8 py-3 pb-6 shrink-0 z-50">
+        <button onclick="switchTab('discover')" id="nav-discover" class="nav-btn text-match-accent flex flex-col items-center gap-1 transition-colors">
+            <i class="fas fa-layer-group text-xl mb-0.5"></i>
+            <span class="text-[10px] font-bold">Discover</span>
+        </button>
+        <button onclick="switchTab('likes')" id="nav-likes" class="nav-btn text-gray-500 hover:text-rose-400 flex flex-col items-center gap-1 relative transition-colors">
+            <i class="fas fa-heart text-xl mb-0.5"></i>
+            <span class="text-[10px] font-bold">Likes</span>
+            <span class="absolute -top-1 -right-2 bg-match-accent text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full border border-match-panel">5+</span>
+        </button>
+        <button onclick="switchTab('chats')" id="nav-chats" class="nav-btn text-gray-500 hover:text-rose-400 flex flex-col items-center gap-1 relative transition-colors">
+            <i class="fas fa-comment-dots text-xl mb-0.5"></i>
+            <span class="text-[10px] font-bold">Chats</span>
+            <span id="chats-unread-dot" class="absolute top-0 right-1 w-2.5 h-2.5 bg-green-500 border-2 border-match-panel rounded-full"></span>
+        </button>
+    </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   SUPABASE REALTIME — wire this up when you add the backend
+   ═══════════════════════════════════════════════════════
+   
+   Replace the mock section below with:
+   
+   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+   
+   Then subscribe to the messages channel:
+   
+   const channel = supabase
+       .channel('messages')
+       .on('postgres_changes', {
+           event: 'INSERT',
+           schema: 'public',
+           table: 'messages',
+           filter: `match_id=eq.${matchId}`
+       }, payload => {
+           appendMessage(payload.new, false);
+           scrollToBottom();
+       })
+       .on('presence', { event: 'sync' }, () => {
+           const state = channel.presenceState();
+           updateOnlineStatus(state);
+       })
+       .subscribe();
+   
+   For typing events use broadcast:
+   channel.send({ type: 'broadcast', event: 'typing', payload: { user_id: myUserId } });
+   channel.on('broadcast', { event: 'typing' }, () => showTyping());
+*/
+
+// ─── Mock data ───────────────────────────────────────
+const CHATS = {
+    john: {
+        name: 'John', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80',
+        online: true, isVip: true,
+        messages: [
+            { from: 'them', text: 'Hey! I saw your profile and just had to say hi 😊', time: '10:32' },
+            { from: 'me',   text: 'Hi John! Thanks, yours looks great too 🙂',        time: '10:33' },
+            { from: 'them', text: 'Would you like to meet for coffee sometime?',        time: '10:35' },
+        ]
+    },
+    sarah: {
+        name: 'Sarah', avatar: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=150&q=80',
+        online: false,
+        messages: [
+            { from: 'me',   text: 'Do you like Lake Kivu?',                           time: '08:12' },
+            { from: 'them', text: 'Yes, I love going to Kivu lake! 🌊',               time: '08:20' },
+        ]
+    },
+    aisha: {
+        name: 'Aisha', avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=150&q=80',
+        online: true,
+        messages: []
+    }
+};
+
+let _currentChat = null;
+let _typingTimer  = null;
+// ─────────────────────────────────────────────────────
+
+function switchTab(tab) {
+    // Hide all views (but not chatroom — that has its own close)
+    ['discover','likes','chats'].forEach(t => {
+        document.getElementById('view-' + t).classList.add('hidden');
+    });
+    document.getElementById('view-chatroom').classList.add('hidden');
+    document.getElementById('view-' + tab).classList.remove('hidden');
+
+    document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('text-match-accent'); b.classList.add('text-gray-500'); });
+    const active = document.getElementById('nav-' + tab);
+    active.classList.remove('text-gray-500'); active.classList.add('text-match-accent');
+}
+
+function swipe(direction) {
+    const card = document.getElementById('tinder-card');
+    card.classList.add(direction === 'left' ? 'swipe-left' : 'swipe-right');
+    setTimeout(() => { card.classList.remove('swipe-left','swipe-right'); card.style.opacity = '0'; setTimeout(() => card.style.opacity = '1', 100); }, 400);
+}
+
+// ─── Chat functions ───────────────────────────────────
+function openChat(chatId) {
+    _currentChat = chatId;
+    const chat = CHATS[chatId];
+
+    document.getElementById('chat-avatar').src  = chat.avatar;
+    document.getElementById('chat-name').textContent   = chat.name;
+    document.getElementById('chat-status').textContent = chat.online ? 'Online' : 'Offline';
+    document.getElementById('chat-status').className   = chat.online ? 'text-[10px] text-green-400' : 'text-[10px] text-gray-500';
+    document.getElementById('chat-online-dot').classList.toggle('hidden', !chat.online);
+
+    // Render messages
+    const container = document.getElementById('chat-messages');
+    container.innerHTML = '';
+    chat.messages.forEach(m => appendMessage(m, true));
+
+    // Switch to chatroom (keep bottom nav visible)
+    ['view-discover','view-likes','view-chats'].forEach(v => document.getElementById(v).classList.add('hidden'));
+    document.getElementById('view-chatroom').classList.remove('hidden');
+
+    scrollToBottom();
+
+    // ── Supabase realtime subscription goes here ──
+    // subscribeToChat(chatId);
+}
+
+function closeChat() {
+    document.getElementById('view-chatroom').classList.add('hidden');
+    document.getElementById('view-chats').classList.remove('hidden');
+    _currentChat = null;
+    // ── Unsubscribe from Supabase channel here ──
+    // unsubscribeFromChat();
+}
+
+function appendMessage(msg, skipScroll) {
+    const container = document.getElementById('chat-messages');
+    const isMe = msg.from === 'me';
+    const div = document.createElement('div');
+    div.className = `flex ${isMe ? 'justify-end' : 'justify-start'} fade-in`;
+    div.innerHTML = `
+        <div class="max-w-[72%]">
+            <div class="${isMe ? 'bubble-me' : 'bubble-them'} px-4 py-2.5 text-sm leading-snug">${msg.text}</div>
+            <p class="text-[9px] text-gray-600 mt-0.5 ${isMe ? 'text-right' : ''}">${msg.time}</p>
+        </div>`;
+    container.appendChild(div);
+    if (!skipScroll) scrollToBottom();
+}
+
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text  = input.value.trim();
+    if (!text || !_currentChat) return;
+
+    const now = new Date();
+    const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const msg = { from: 'me', text, time };
+
+    // Push to local state
+    CHATS[_currentChat].messages.push(msg);
+    appendMessage(msg, false);
+
+    // Update preview in chat list
+    const previewEl = document.getElementById(_currentChat + '-preview');
+    const timeEl    = document.getElementById(_currentChat + '-time');
+    if (previewEl) previewEl.textContent = text;
+    if (timeEl)    timeEl.textContent    = 'Just now';
+
+    input.value = '';
+
+    // ── Insert to Supabase here ──
+    // await supabase.from('messages').insert({ match_id, sender_id: myUserId, content: text });
+
+    // Mock: simulate a reply after 1.5s
+    if (_currentChat === 'john') simulateReply();
+}
+
+function simulateReply() {
+    // Show typing indicator
+    document.getElementById('typing-indicator').classList.remove('hidden');
+    scrollToBottom();
+    setTimeout(() => {
+        document.getElementById('typing-indicator').classList.add('hidden');
+        const replies = [
+            "That's great to hear! 😊",
+            "I totally agree with you!",
+            "Tell me more about yourself 🙂",
+            "You seem really interesting!",
+        ];
+        const text = replies[Math.floor(Math.random() * replies.length)];
+        const now  = new Date();
+        const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+        const msg  = { from: 'them', text, time };
+        CHATS[_currentChat]?.messages.push(msg);
+        if (_currentChat === 'john') appendMessage(msg, false);
+    }, 1500);
+}
+
+function onTyping() {
+    // ── Broadcast typing event to Supabase here ──
+    // channel.send({ type: 'broadcast', event: 'typing', payload: { user_id: myUserId } });
+}
+
+function showTyping() {
+    document.getElementById('typing-indicator').classList.remove('hidden');
+    scrollToBottom();
+    clearTimeout(_typingTimer);
+    _typingTimer = setTimeout(() => document.getElementById('typing-indicator').classList.add('hidden'), 2500);
+}
+
+function scrollToBottom() {
+    const c = document.getElementById('chat-messages');
+    setTimeout(() => c.scrollTop = c.scrollHeight, 50);
+}
+
+// ─── Realtime connection mock ─────────────────────────
+// In production replace with actual Supabase channel subscribe()
+// and update #realtime-status accordingly:
+// channel.on('system', {}, (payload) => {
+//     if (payload.status === 'SUBSCRIBED') setStatus(true);
+//     if (payload.status === 'CLOSED')     setStatus(false);
+// });
+function setRealtimeStatus(connected) {
+    const dot  = document.querySelector('#realtime-status span.realtime-dot');
+    const text = document.querySelector('#realtime-status span:last-child');
+    if (connected) {
+        dot.className  = 'w-2 h-2 bg-green-400 rounded-full realtime-dot';
+        text.className = 'text-[10px] text-green-400 font-bold';
+        text.textContent = 'Realtime connected';
+    } else {
+        dot.className  = 'w-2 h-2 bg-red-500 rounded-full';
+        text.className = 'text-[10px] text-red-400 font-bold';
+        text.textContent = 'Reconnecting...';
+    }
+}
+</script>
 </body>
 </html>

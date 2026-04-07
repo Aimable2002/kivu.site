@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>List My Clinic — Kivu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+        #map-picker{height:200px;border-radius:12px;overflow:hidden;border:2px solid #e5e7eb}
+        #map-picker.active{border-color:#1D4ED8}
+        .tag-pill input[type=checkbox]{display:none}
+        .tag-pill label{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #e5e7eb;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#6b7280;transition:all .15s;user-select:none}
+        .tag-pill input:checked+label{background:#1D4ED8;border-color:#1D4ED8;color:#fff}
+        .step{display:none}.step.active{display:block}
+        .step-dot{width:8px;height:8px;border-radius:50%;background:#e5e7eb;transition:background .2s}
+        .step-dot.active{background:#1D4ED8}.step-dot.done{background:#22c55e}
+    </style>
+</head>
+<body class="bg-gray-100 h-screen w-full flex justify-center overflow-hidden font-sans">
+<div class="w-full max-w-md h-full bg-white shadow-2xl flex flex-col">
+
+    <div class="text-white pt-10 pb-4 px-4 shrink-0" style="background:#1D4ED8">
+        <div class="flex items-center gap-3 mb-3">
+            <a href="/clinic" class="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg leading-none">List My Clinic</h1>
+                <p class="text-[10px] text-white/80">Join Kivu Healthcare directory</p>
+            </div>
+        </div>
+        <!-- 5 dots now -->
+        <div class="flex items-center justify-center gap-2">
+            <div class="step-dot active" id="dot-1"></div><div class="h-px w-6 bg-white/30"></div>
+            <div class="step-dot" id="dot-2"></div><div class="h-px w-6 bg-white/30"></div>
+            <div class="step-dot" id="dot-3"></div><div class="h-px w-6 bg-white/30"></div>
+            <div class="step-dot" id="dot-4"></div><div class="h-px w-6 bg-white/30"></div>
+            <div class="step-dot" id="dot-5"></div>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto no-scrollbar" id="m-form-wrapper">
+
+        <!-- STEP 1: Basic Info -->
+        <div id="step-1" class="step active p-4 pb-24 space-y-3">
+            <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase">Step 1 — Basic Info</p>
+            <div id="s1-msg" class="hidden bg-red-50 text-red-500 text-xs font-bold px-3 py-2 rounded-lg"></div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Clinic / Hospital Name *</label>
+                <input id="m-name" type="text" placeholder="e.g. Kigali Medical Center"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Category *</label>
+                <select id="m-category" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400">
+                    <option>General Practice</option>
+                    <option>Dental Clinic</option>
+                    <option>Eye Clinic</option>
+                    <option>Pediatric Clinic</option>
+                    <option>Maternity Clinic</option>
+                    <option>Physiotherapy</option>
+                    <option>Mental Health</option>
+                    <option>Dermatology</option>
+                    <option>Cardiology</option>
+                    <option>Hospital</option>
+                    <option>Pharmacy</option>
+                    <option>Laboratory</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">WhatsApp / Phone *</label>
+                <input id="m-phone" type="tel" placeholder="+250 7XX XXX XXX"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Opening Hours</label>
+                <input id="m-hours" type="text" placeholder="e.g. Mon–Fri 7am–8pm, Sat 8am–5pm"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Walk-ins or Appointment?</label>
+                <select id="m-booking" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400">
+                    <option value="appointment">Appointment Only</option>
+                    <option value="walkin">Walk-ins Welcome</option>
+                    <option value="both">Both</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Description</label>
+                <textarea id="m-desc" rows="3" placeholder="Describe your clinic, specialties, and services..."
+                          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none resize-none focus:border-blue-400"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Cover Photo URL</label>
+                <input id="m-cover" type="url" placeholder="https://..."
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">YouTube URL <span class="text-gray-400 font-normal">(optional)</span></label>
+                <input id="m-youtube" type="url" placeholder="https://youtube.com/..."
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-2">Features & Tags</label>
+                <div class="flex flex-wrap gap-2">
+                    <div class="tag-pill"><input type="checkbox" id="tag-emergency" value="emergency"><label for="tag-emergency">🚑 Emergency</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-insurance" value="insurance"><label for="tag-insurance">🛡️ Insurance</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-lab"       value="lab">      <label for="tag-lab">🧪 Lab Tests</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-pediatric" value="pediatric"><label for="tag-pediatric">👶 Pediatric</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-dental"    value="dental">   <label for="tag-dental">🦷 Dental</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-pharmacy"  value="pharmacy"> <label for="tag-pharmacy">💊 Pharmacy</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-parking"   value="parking">  <label for="tag-parking">🚗 Parking</label></div>
+                    <div class="tag-pill"><input type="checkbox" id="tag-ambulance" value="ambulance"><label for="tag-ambulance">🚐 Ambulance</label></div>
+                </div>
+            </div>
+
+            <button onclick="goToStep(2)" class="w-full text-white font-bold py-3.5 rounded-xl text-sm active:scale-95 transition mt-2" style="background:#1D4ED8">
+                Next: Location →
+            </button>
+        </div>
+
+        <!-- STEP 2: Location -->
+        <div id="step-2" class="step p-4 pb-24 space-y-3">
+            <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase">Step 2 — Location</p>
+            <p class="text-xs text-gray-500">Tap the map to pin your exact location.</p>
+            <div id="map-picker"></div>
+            <button id="location-btn" onclick="useMyLocation()"
+                    class="w-full border border-gray-200 rounded-xl py-2.5 text-xs font-bold text-gray-600 flex items-center justify-center gap-2 active:scale-95 transition">
+                <i class="fas fa-crosshairs"></i> Use My Current Location
+            </button>
+            <div id="map-coords" class="hidden bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5 text-xs text-blue-700 font-bold">
+                📍 <span id="coords-text"></span>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Street Address *</label>
+                <input id="m-address" type="text" placeholder="e.g. KG 123 St, Kimihurura"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400">
+            </div>
+            <input type="hidden" id="m-lat">
+            <input type="hidden" id="m-lng">
+
+            <div class="flex gap-3 mt-4">
+                <button onclick="goToStep(1)" class="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-xl text-sm active:scale-95 transition">← Back</button>
+                <button onclick="goToStep(3)" class="flex-1 text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition" style="background:#1D4ED8">Next: Services →</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Services -->
+        <div id="step-3" class="step p-4 pb-24 space-y-3">
+            <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase">Step 3 — Services & Fees</p>
+            <p class="text-xs text-gray-500">Add your medical services with consultation fees.</p>
+            <div id="services-builder" class="space-y-3">
+                <div id="svc-placeholder" class="text-xs text-gray-400 italic text-center py-4 border border-dashed border-gray-200 rounded-xl">No services added yet</div>
+            </div>
+            <button onclick="addServiceCategory()" class="w-full border-2 border-dashed border-blue-200 text-blue-600 font-bold py-3 rounded-xl text-sm active:scale-95 transition flex items-center justify-center gap-2">
+                <i class="fas fa-plus"></i> Add Service Category
+            </button>
+            <div class="flex gap-3 mt-4">
+                <button onclick="goToStep(2)" class="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-xl text-sm active:scale-95 transition">← Back</button>
+                <button onclick="goToStep(4)" class="flex-1 text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition" style="background:#1D4ED8">Next: Doctors →</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: Doctors -->
+        <div id="step-4" class="step p-4 pb-24 space-y-3">
+            <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase">Step 4 — Doctors <span class="text-gray-300 font-normal normal-case">(optional)</span></p>
+            <p class="text-xs text-gray-500">Add the doctors or practitioners at your clinic.</p>
+            <div id="doctors-builder" class="space-y-3">
+                <div id="doc-placeholder" class="text-xs text-gray-400 italic text-center py-4 border border-dashed border-gray-200 rounded-xl">No doctors added yet</div>
+            </div>
+            <button onclick="addDoctor()" class="w-full border-2 border-dashed border-blue-200 text-blue-600 font-bold py-3 rounded-xl text-sm active:scale-95 transition flex items-center justify-center gap-2">
+                <i class="fas fa-user-md"></i> Add Doctor
+            </button>
+            <div class="flex gap-3 mt-4">
+                <button onclick="goToStep(3)" class="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-xl text-sm active:scale-95 transition">← Back</button>
+                <button onclick="goToStep(5)" class="flex-1 text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition" style="background:#1D4ED8">Next: Review →</button>
+            </div>
+        </div>
+
+        <!-- STEP 5: Review & Submit -->
+        <div id="step-5" class="step p-4 pb-24 space-y-3">
+            <p class="text-[10px] font-black tracking-widest text-gray-400 uppercase">Step 5 — Review & Submit</p>
+            <div id="review-summary"></div>
+            <p class="text-[10px] text-gray-400 italic">Your clinic will appear after admin review (usually within 24h).</p>
+            <div class="flex gap-3 mt-4">
+                <button onclick="goToStep(4)" class="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-xl text-sm active:scale-95 transition">← Back</button>
+                <button id="m-submit" onclick="submitApplication()" class="flex-1 text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition" style="background:#1D4ED8">Submit →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success -->
+    <div id="m-success" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-4xl mb-4">✅</div>
+        <h2 class="font-black text-xl text-gray-900 mb-2">Application Submitted!</h2>
+        <p class="text-sm text-gray-500 mb-6">Your clinic listing is under review. We'll notify you once it's live.</p>
+        <a href="/clinic" class="text-white font-bold px-8 py-3 rounded-xl text-sm" style="background:#1D4ED8">← Back to Clinics</a>
+    </div>
+</div>
+
+<script>
+const TOTAL_STEPS = 5;
+let _currentStep = 1;
+let _catCount    = 0;
+let _itemCount   = 0;
+let _docCount    = 0;
+
+// ─── Step navigation ──────────────────────────────────────────────────────────
+function goToStep(step) {
+    // Validate step 1 before leaving
+    if (_currentStep === 1 && step > 1) {
+        const name  = document.getElementById('m-name').value.trim();
+        const phone = document.getElementById('m-phone').value.trim();
+        if (!name || !phone) {
+            const msg = document.getElementById('s1-msg');
+            msg.textContent = 'Please fill in clinic name and phone.';
+            msg.classList.remove('hidden');
+            return;
+        }
+        document.getElementById('s1-msg').classList.add('hidden');
+    }
+
+    if (step === 5) buildReviewSummary();
+
+    document.getElementById('step-' + _currentStep).classList.remove('active');
+    document.getElementById('dot-'  + _currentStep).classList.remove('active');
+    document.getElementById('dot-'  + _currentStep).classList.add('done');
+
+    _currentStep = step;
+
+    document.getElementById('step-' + step).classList.add('active');
+    document.getElementById('dot-'  + step).classList.add('active');
+    document.getElementById('dot-'  + step).classList.remove('done');
+
+    document.querySelector('.flex-1.overflow-y-auto').scrollTop = 0;
+    if (step === 2 && !window._mapInit) initMap();
+}
+
+// ─── Map (step 2) ─────────────────────────────────────────────────────────────
+function initMap() {
+    window._mapInit = true;
+    const el = document.getElementById('map-picker');
+    el.classList.add('active');
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = () => {
+        const map = L.map('map-picker').setView([-1.9441, 30.0619], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        let marker = null;
+        map.on('click', (e) => {
+            if (marker) map.removeLayer(marker);
+            marker = L.marker(e.latlng).addTo(map);
+            document.getElementById('m-lat').value = e.latlng.lat;
+            document.getElementById('m-lng').value = e.latlng.lng;
+            document.getElementById('coords-text').textContent = `${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
+            document.getElementById('map-coords').classList.remove('hidden');
+        });
+        window._map = map;
+    };
+    document.head.appendChild(script);
+}
+
+function useMyLocation() {
+    const btn = document.getElementById('location-btn');
+    btn.textContent = 'Locating...';
+    navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        document.getElementById('m-lat').value = lat;
+        document.getElementById('m-lng').value = lng;
+        document.getElementById('coords-text').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        document.getElementById('map-coords').classList.remove('hidden');
+        btn.innerHTML = '<i class="fas fa-check"></i> Location Set';
+        if (window._map) window._map.setView([lat, lng], 16);
+    }, () => { btn.innerHTML = '<i class="fas fa-crosshairs"></i> Use My Current Location'; });
+}
+
+// ─── Services builder (step 3) ────────────────────────────────────────────────
+function addServiceCategory() {
+    _catCount++;
+    const id = 'scat-' + _catCount;
+    document.getElementById('svc-placeholder')?.remove();
+    const div = document.createElement('div');
+    div.id = id; div.className = 'border border-gray-200 rounded-xl overflow-hidden';
+    div.innerHTML = `
+    <div class="bg-gray-50 px-3 py-2.5 flex items-center gap-2 border-b border-gray-200">
+        <input type="text" placeholder="Category * (e.g. Consultations, Lab Tests, Imaging)" id="${id}-name"
+               class="flex-1 bg-transparent text-sm font-bold text-gray-800 outline-none placeholder-gray-300" style="min-width:0">
+        <button onclick="document.getElementById('${id}').remove()" class="text-gray-300 hover:text-red-400 text-sm"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="${id}-items" class="divide-y divide-gray-100"></div>
+    <button onclick="addServiceItem('${id}')" class="w-full py-2.5 text-xs text-gray-400 hover:text-blue-600 font-bold flex items-center justify-center gap-1 transition">
+        <i class="fas fa-plus text-[10px]"></i> Add Service
+    </button>`;
+    document.getElementById('services-builder').appendChild(div);
+    document.getElementById(id + '-name').focus();
+    addServiceItem(id);
+}
+
+function addServiceItem(catId) {
+    _itemCount++;
+    const id = `${catId}-item-${_itemCount}`;
+    const div = document.createElement('div'); div.id = id; div.className = 'p-3';
+    div.innerHTML = `
+    <div class="flex gap-2 items-start">
+        <div class="flex-1 space-y-1.5">
+            <input type="text" placeholder="Service name * (e.g. General Consultation, X-Ray)" id="${id}-name"
+                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-400">
+            <input type="text" placeholder="Description (optional)" id="${id}-desc"
+                   class="w-full border border-gray-100 bg-gray-50 rounded-lg px-3 py-2 text-xs outline-none">
+            <div class="flex gap-2">
+                <div class="flex-1">
+                    <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Fee (RWF) *</p>
+                    <input type="number" placeholder="5000" id="${id}-price"
+                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-400">
+                </div>
+                <div class="flex-1">
+                    <p class="text-[9px] font-bold text-blue-600 uppercase mb-1">Duration (min)</p>
+                    <select id="${id}-duration" class="w-full border border-blue-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-400">
+                        <option value="">Select</option>
+                        <option value="15">15 min</option>
+                        <option value="30">30 min</option>
+                        <option value="45">45 min</option>
+                        <option value="60">60 min</option>
+                        <option value="90">90 min</option>
+                        <option value="120">2 hours</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <button onclick="document.getElementById('${id}').remove()" class="text-gray-200 hover:text-red-400 text-sm pt-1 shrink-0"><i class="fas fa-times"></i></button>
+    </div>`;
+    document.getElementById(catId + '-items').appendChild(div);
+}
+
+function collectServices() {
+    const cats = [];
+    document.querySelectorAll('#services-builder>[id^="scat-"]').forEach(catEl => {
+        const catName = document.getElementById(catEl.id + '-name')?.value.trim() || 'Services';
+        const items = [];
+        catEl.querySelectorAll(`[id^="${catEl.id}-item-"]`).forEach(itemEl => {
+            const name = document.getElementById(itemEl.id + '-name')?.value.trim();
+            if (!name) return;
+            items.push({
+                name,
+                description: document.getElementById(itemEl.id + '-desc')?.value.trim() || null,
+                price:       parseInt(document.getElementById(itemEl.id + '-price')?.value) || 0,
+                duration:    parseInt(document.getElementById(itemEl.id + '-duration')?.value) || null,
+            });
+        });
+        if (items.length) cats.push({ name: catName, items });
+    });
+    return cats;
+}
+
+// ─── Doctors builder (step 4) ─────────────────────────────────────────────────
+function addDoctor() {
+    _docCount++;
+    const id = 'doc-' + _docCount;
+    document.getElementById('doc-placeholder')?.remove();
+    const div = document.createElement('div');
+    div.id = id; div.className = 'border border-gray-200 rounded-xl p-3 space-y-2';
+    div.innerHTML = `
+    <div class="flex items-center justify-between mb-1">
+        <p class="text-xs font-black text-gray-700">👨‍⚕️ Doctor ${_docCount}</p>
+        <button onclick="document.getElementById('${id}').remove(); recheckDocPlaceholder()"
+                class="text-gray-300 hover:text-red-400 text-sm"><i class="fas fa-times"></i></button>
+    </div>
+    <input type="text" placeholder="Full name * (e.g. Dr. Amina Uwase)" id="${id}-name"
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-400">
+    <input type="text" placeholder="Specialty * (e.g. General Practitioner, Radiologist)" id="${id}-specialty"
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-400">
+    <div class="flex gap-2">
+        <div class="flex-1">
+            <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Years Experience</p>
+            <input type="number" placeholder="e.g. 8" id="${id}-years"
+                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-400">
+        </div>
+        <div class="flex-1">
+            <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Schedule</p>
+            <input type="text" placeholder="e.g. Mon–Sat" id="${id}-schedule"
+                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-400">
+        </div>
+    </div>
+    <input type="url" placeholder="Photo URL (optional)" id="${id}-photo"
+           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-400">`;
+    document.getElementById('doctors-builder').appendChild(div);
+    document.getElementById(id + '-name').focus();
+}
+
+function recheckDocPlaceholder() {
+    const builder = document.getElementById('doctors-builder');
+    if (!builder.querySelector('[id^="doc-"]')) {
+        const ph = document.createElement('div');
+        ph.id = 'doc-placeholder';
+        ph.className = 'text-xs text-gray-400 italic text-center py-4 border border-dashed border-gray-200 rounded-xl';
+        ph.textContent = 'No doctors added yet';
+        builder.appendChild(ph);
+    }
+}
+
+function collectDoctors() {
+    const docs = [];
+    document.querySelectorAll('#doctors-builder>[id^="doc-"]').forEach(docEl => {
+        const name = document.getElementById(docEl.id + '-name')?.value.trim();
+        if (!name) return;
+        docs.push({
+            name,
+            specialty:  document.getElementById(docEl.id + '-specialty')?.value.trim() || null,
+            years_exp:  parseInt(document.getElementById(docEl.id + '-years')?.value)   || null,
+            schedule:   document.getElementById(docEl.id + '-schedule')?.value.trim()   || null,
+            photo_url:  document.getElementById(docEl.id + '-photo')?.value.trim()      || null,
+        });
+    });
+    return docs;
+}
+
+// ─── Review summary (step 5) ──────────────────────────────────────────────────
+function buildReviewSummary() {
+    const services = collectServices();
+    const doctors  = collectDoctors();
+    const tags     = [...document.querySelectorAll('.tag-pill input:checked')].map(i => i.value);
+
+    document.getElementById('review-summary').innerHTML = `
+    <div class="bg-gray-50 rounded-xl p-4 space-y-1.5 text-xs text-gray-600 mb-3">
+        <p><span class="font-bold text-gray-900">Name:</span> ${document.getElementById('m-name').value}</p>
+        <p><span class="font-bold text-gray-900">Category:</span> ${document.getElementById('m-category').value}</p>
+        <p><span class="font-bold text-gray-900">Phone:</span> ${document.getElementById('m-phone').value}</p>
+        <p><span class="font-bold text-gray-900">Hours:</span> ${document.getElementById('m-hours').value || '—'}</p>
+        <p><span class="font-bold text-gray-900">Booking:</span> ${document.getElementById('m-booking').value}</p>
+        <p><span class="font-bold text-gray-900">Address:</span> ${document.getElementById('m-address').value || '—'}</p>
+        ${tags.length ? `<p><span class="font-bold text-gray-900">Tags:</span> ${tags.join(', ')}</p>` : ''}
+    </div>
+
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-3">
+        <p class="text-xs font-black text-blue-700 mb-2">🏥 Services — ${services.reduce((a, c) => a + c.items.length, 0)} items in ${services.length} categories</p>
+        ${services.map(c => `
+            <p class="text-xs font-bold text-gray-700 mt-2">${c.name}</p>
+            ${c.items.map(i => `<p class="text-xs text-gray-500 pl-3">• ${i.name} — <b>${i.price.toLocaleString()} RWF</b>${i.duration ? ` · ${i.duration}min` : ''}</p>`).join('')}
+        `).join('') || '<p class="text-xs text-gray-400 italic">No services added</p>'}
+    </div>
+
+    <div class="bg-green-50 border border-green-100 rounded-xl p-4">
+        <p class="text-xs font-black text-green-700 mb-2">👨‍⚕️ Doctors — ${doctors.length} ${doctors.length === 1 ? 'practitioner' : 'practitioners'}</p>
+        ${doctors.map(d => `
+            <p class="text-xs text-gray-700 mt-1">• <b>${d.name}</b>${d.specialty ? ` — ${d.specialty}` : ''}${d.years_exp ? ` · ${d.years_exp} yrs` : ''}${d.schedule ? ` · ${d.schedule}` : ''}</p>
+        `).join('') || '<p class="text-xs text-gray-400 italic">No doctors added</p>'}
+    </div>`;
+}
+
+// ─── Submit ───────────────────────────────────────────────────────────────────
+async function submitApplication() {
+    const btn = document.getElementById('m-submit');
+    btn.textContent = 'Submitting...'; btn.disabled = true;
+
+    const services = collectServices();
+    const doctors  = collectDoctors();
+    const tags     = [...document.querySelectorAll('.tag-pill input:checked')].map(i => i.value);
+
+    const payload = {
+        name:            document.getElementById('m-name').value.trim(),
+        description:     document.getElementById('m-desc').value.trim(),
+        category:        document.getElementById('m-category').value,
+        phone:           document.getElementById('m-phone').value.trim(),
+        hours:           document.getElementById('m-hours').value.trim(),
+        booking_type:    document.getElementById('m-booking').value,
+        address:         document.getElementById('m-address').value.trim(),
+        lat:             parseFloat(document.getElementById('m-lat').value) || null,
+        lng:             parseFloat(document.getElementById('m-lng').value) || null,
+        cover_image_url: document.getElementById('m-cover').value.trim()   || null,
+        youtube_url:     document.getElementById('m-youtube').value.trim() || null,
+        tags,
+        menu_data:    services,
+        doctors_data: doctors,   // stored as JSONB, expanded into clinic_doctors on approval
+    };
+
+    const { supabase } = await import('/js/supabase.js');
+    const { error } = await supabase.from('clinic_applications').insert(payload);
+    if (error) {
+        alert('Error: ' + error.message);
+        btn.textContent = 'Submit Application';
+        btn.disabled = false;
+        return;
+    }
+    document.getElementById('m-form-wrapper').classList.add('hidden');
+    document.getElementById('m-success').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
